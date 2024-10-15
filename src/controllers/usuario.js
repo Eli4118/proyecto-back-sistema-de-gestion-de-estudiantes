@@ -123,7 +123,10 @@ const UsuarioController = {
   listar: async (req, res) => {
     try {
       const usuarios = await Usuario.find();
-      res.status(200).json(usuarios);
+      //res.status(200).json(usuarios);
+      console.log(usuarios); // Verificar que los datos lleguen correctamente
+      // Renderizar la vista Pug 'listar' pasando la lista de usuarios
+      res.render('listar', { usuarios });
     } catch (error) {
       res.status(500).json({ message: 'Error al listar los usuarios', error: error.message });
     }
