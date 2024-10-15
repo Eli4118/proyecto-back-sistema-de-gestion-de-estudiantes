@@ -1,0 +1,31 @@
+extends index 
+block content 
+    h1 Registro de Usuario
+    form(action="/registro" method="POST")
+      div
+        label(for="nombres") Nombres:
+        input(type="text" name="nombres" required placeholder="Juan Carlos")
+      div
+        label(for="apellidos") Apellidos:
+        input(type="text" name="apellidos" required placeholder="Pérez López")
+      div
+        label(for="edad") Edad:
+        input(type="number" name="edad" min="1" max="99" required)
+      div
+        label(for="correo") Correo Electrónico:
+        input(type="email" name="correo" required placeholder="example@email.com")
+      div
+        label(for="dni") DNI:
+        input(type="number" name="dni" required placeholder="12345678")
+      div
+        label(for="rol") Rol:
+        select(name="rol" required)
+          option(value="estudiante") Estudiante
+          option(value="profesor") Profesor
+          option(value="tutor") Tutor
+          option(value="administrativo") Administrativo
+      div
+        label(for="curso") Curso:
+        input(type="text" name="curso" placeholder="Curso al que pertenece")
+      div
+        button(type="submit") Registrar
