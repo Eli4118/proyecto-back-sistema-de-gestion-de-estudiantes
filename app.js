@@ -12,14 +12,7 @@ app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'src/views')); // Carpeta donde estarán las vistas Pug
 
 
-app.get('/', (req, res) => {
-  //response.send('Hola  mundo');// Ruta principal para la página de inicio
-  res.render("index")
-});
 
-app.get('/registro', (req, res) => {
-  res.render("registro")
-});
 
 // Middleware para manejar JSON y formularios
 app.use(express.json());

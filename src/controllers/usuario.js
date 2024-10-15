@@ -106,7 +106,7 @@ class UsuarioController  {
 */
 
 const UsuarioController = {
-  crear: async (req, res) => {
+  registro: async (req, res) => {
     try {
       const usuario = new Usuario(req.body);
       await usuario.save(); // Esto desencadenará las validaciones

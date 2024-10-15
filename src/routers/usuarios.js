@@ -8,7 +8,7 @@ const usuarioRouter = express.Router();
   });
 // Rutas para usuarios */
 
-usuarioRouter.post('/', usuarioController.crear); // Crear usuario
+usuarioRouter.post('/', usuarioController.registro); // Crear usuario
 usuarioRouter.get('/', usuarioController.listar); // Listar usuarios
 usuarioRouter.get('/:rol', usuarioController.listarPorRol); // Listar usuarios por rol
 usuarioRouter.get('/dni/:dni', usuarioController.buscarPorDni); // Obtener usuario por dni

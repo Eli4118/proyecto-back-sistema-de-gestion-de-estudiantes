@@ -1,31 +1,67 @@
 extends index 
 block content 
-    h1 Registro de Usuario
-    form(action="/registro" method="POST")
-      div
-        label(for="nombres") Nombres:
-        input(type="text" name="nombres" required placeholder="Juan Carlos")
-      div
-        label(for="apellidos") Apellidos:
-        input(type="text" name="apellidos" required placeholder="Pérez López")
-      div
-        label(for="edad") Edad:
-        input(type="number" name="edad" min="1" max="99" required)
-      div
-        label(for="correo") Correo Electrónico:
-        input(type="email" name="correo" required placeholder="example@email.com")
-      div
-        label(for="dni") DNI:
-        input(type="number" name="dni" required placeholder="12345678")
-      div
-        label(for="rol") Rol:
-        select(name="rol" required)
-          option(value="estudiante") Estudiante
-          option(value="profesor") Profesor
-          option(value="tutor") Tutor
-          option(value="administrativo") Administrativo
-      div
-        label(for="curso") Curso:
-        input(type="text" name="curso" placeholder="Curso al que pertenece")
-      div
-        button(type="submit") Registrar
+    .container.mt-5 
+      h1.text-center Registro de Usuario
+
+      // Formulario con clases de Bootstrap
+      form(action="/usuarios" method="POST" class="needs-validation" novalidate)
+        .form-group
+          label(for="nombres") Nombres:
+          input.form-control(type="text" name="nombres" required placeholder="Juan Carlos")
+          div.invalid-feedback El nombre es obligatorio y solo puede contener letras y espacios.
+        
+        .form-group
+          label(for="apellidos") Apellidos:
+          input.form-control(type="text" name="apellidos" required placeholder="Pérez López")
+          div.invalid-feedback El apellido es obligatorio y solo puede contener letras y espacios.
+
+        .form-group
+          label(for="edad") Edad:
+          input.form-control(type="number" name="edad" min="1" max="99" required)
+          div.invalid-feedback La edad debe ser entre 1 y 99.
+
+        .form-group
+          label(for="correo") Correo Electrónico:
+          input.form-control(type="email" name="correo" required placeholder="example@email.com")
+          div.invalid-feedback El correo electrónico no es válido o es obligatorio.
+
+        .form-group
+          label(for="dni") DNI:
+          input.form-control(type="number" name="dni" required placeholder="12345678")
+          div.invalid-feedback El DNI es obligatorio y debe ser un número válido.
+
+        .form-group
+          label(for="rol") Rol:
+          select.form-control(name="rol" required)
+            option(value="" disabled selected) Selecciona un rol
+            option(value="estudiante") Estudiante
+            option(value="profesor") Profesor
+            option(value="tutor") Tutor
+            option(value="administrativo") Administrativo
+          div.invalid-feedback El rol es obligatorio.
+
+        .form-group
+          label(for="curso") Curso:
+          input.form-control(type="text" name="curso" placeholder="Curso al que pertenece")
+          div.invalid-feedback El curso es obligatorio.
+
+        button.btn.btn-primary(type="submit") Registrar
+
+    // Validaciones personalizadas de Bootstrap
+    script.
+      // Validación personalizada de Bootstrap
+      (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+          var forms = document.getElementsByClassName('needs-validation');
+          Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+              if (form.checkValidity() === false) {
+                event.preventDefault();
+                event.stopPropagation();
+              }
+              form.classList.add('was-validated');
+            }, false);
+          });
+        }, false);
+      })();
