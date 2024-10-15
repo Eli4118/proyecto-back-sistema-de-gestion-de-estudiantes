@@ -124,7 +124,6 @@ const UsuarioController = {
     try {
       const usuarios = await Usuario.find();
       //res.status(200).json(usuarios);
-      console.log(usuarios); // Verificar que los datos lleguen correctamente
       // Renderizar la vista Pug 'listar' pasando la lista de usuarios
       res.render('listar', { usuarios });
     } catch (error) {
