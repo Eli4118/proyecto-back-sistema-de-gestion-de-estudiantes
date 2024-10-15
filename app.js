@@ -7,14 +7,14 @@ const router = require('./src/routers/indexRoutes.js');// importa Archivo de rut
 // Conectar a la base de datos
 conectarDB();
 
-app.get('/', (request, response) => {
-  response.send('Hola  mundo');// Ruta principal para la página de inicio
-});
-
 // Configurar Pug como motor de vistas
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'src/views')); // Carpeta donde estarán las vistas Pug
 
+app.get('/', (req, res) => {
+  //response.send('Hola  mundo');// Ruta principal para la página de inicio
+  res.render("index")
+});
 // Middleware para manejar JSON y formularios
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
