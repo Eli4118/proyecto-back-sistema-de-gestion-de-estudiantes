@@ -1,7 +1,11 @@
 const mongoose = require('mongoose');
 
-// Definir un esquema mixto para usuarios
 const UsuarioSchema = new mongoose.Schema({
+  rol: { 
+    type: String, 
+    enum: ['estudiante', 'tutor', 'profesor', 'administrador'], 
+    required: true 
+  },
   nombres: {
     type: String,
     required: true,
@@ -36,37 +40,21 @@ const UsuarioSchema = new mongoose.Schema({
   },
   dni: {
     type: Number,
-    required: [true, 'El dni es obligatorio'],
+    required: [true, 'El DNI es obligatorio'],
     unique: true,
   },
-  rol: {
-    type: String,
-    enum: ['estudiante', 'profesor', 'tutor', 'administrativo'],
-    required: true
+  // Campos específicos para "estudiantes"
+  dniTutor: { // DNI del tutor para facilitar la búsqueda
+    type: Number,
+    // Esto puede ser opcional, puedes decidir si es obligatorio o no
   },
   curso: {
-    type:  String,
-    ref: 'Curso',
-    /* required: function() {
+    type: String,
+    // Puedes hacer que sea requerido solo si el rol es 'estudiante'
+    required: function() {
       return this.rol === 'estudiante'; // Solo requerido si el rol es estudiante
-    } */
+    }
   },
-   /* // Ahora relacionamos padres e hijos por DNI
-    padres: [{
-      type: Number,  // Usamos el campo DNI en lugar de ObjectId
-      ref: 'Usuario',
-      required: function() {
-        return this.rol === 'estudiante';
-      }
-    }],
-    hijos: [{
-      type: Number,  // Usamos el campo DNI en lugar de ObjectId
-      ref: 'Usuario',
-      required: function() {
-        return this.rol === 'padre';
-      }
-    }]
-  */
 });
 
 
