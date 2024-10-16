@@ -1,6 +1,7 @@
 const { model } = require("mongoose");
 const Usuario = require('../models/usuarios'); // Importa el esquema base
 const UsuarioController = {
+  
 
 
   registro: async (req, res) => {

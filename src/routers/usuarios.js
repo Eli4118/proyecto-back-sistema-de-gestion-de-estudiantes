@@ -1,5 +1,5 @@
 const express = require('express');
-
+const verificarRol = require('../middleware/verificarRol')//para protejer la ruta
 const usuarioController = require('../controllers/usuario');
 const usuarioRouter = express.Router();
 // Define la ruta base '/estudiantes' y el contenido que va a devolver

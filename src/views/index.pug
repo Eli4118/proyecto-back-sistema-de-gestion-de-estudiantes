@@ -27,6 +27,16 @@ html
             li.nav-item
               a.nav-link.disabled(aria-disabled='true') Disabled
 
+
+            //- Si el usuario está autenticado, mostrar el link de Logout
+            if usuarioAutenticado
+              li.nav-item
+                  form(action='login/logout', method='POST', style='display: inline;')
+                    button.btn.btn-link(type='submit') Logout
+            else
+              li.nav-item
+                a.nav-link(href='/login') Login
+
     //- Aquí es donde se cargará el contenido dinámico de cada vista
     .container.mt-4
       block content
