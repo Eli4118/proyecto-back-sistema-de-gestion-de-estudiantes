@@ -35,7 +35,7 @@ const CursoSchema = new mongoose.Schema({
   }],
   estudiantes: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Usuario' // Relaciona a los estudiantes que están inscritos en este curso
+    ref: 'Usuario' // Relaciona a los estudiantes que están inscritos en este curso//controlar hasta 30 por curso
   }]
 });
 
