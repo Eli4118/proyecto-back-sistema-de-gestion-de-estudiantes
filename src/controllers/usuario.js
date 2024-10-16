@@ -1,19 +1,50 @@
 const { model } = require("mongoose");
 const Usuario = require('../models/usuarios'); // Importa el esquema base
 const UsuarioController = {
-  registro: async (req, res) => {
-    try {
-      const usuario = new Usuario(req.body);
-      await usuario.save(); // Esto desencadenará las validaciones
-      res.status(201).json({ message: 'Usuario creado exitosamente', usuario });
-    } catch (error) {
-      // Si ocurre un error de validación o cualquier otro, devolvemos un mensaje de error
-      if (error.name === 'ValidationError') {
-        return res.status(400).json({ message: 'Error de validación', error: error.message });
-      }
-      res.status(500).json({ message: 'Error al crear usuario', error: error.message });
+
+
+registro: async (req, res) => {
+
+  try {
+
+    const usuario = new Usuario(req.body);
+    await usuario.save(); // Esto desencadenará las validaciones
+    // Redirigimos a la vista de registro, con un mensaje de éxito
+    res.status(201).render('registro', { successMessage: 'Usuario creado exitosamente', formData: {}, invalidFields: {} });
+  } catch (error) {
+    const formData = req.body; // Datos ingresados por el usuario
+    const invalidFields = {}; // Objeto para mantener el estado de los campos inválidos
+
+    // Verifica si hay campos que están mal y márcalos como inválidos
+    if (error.code === 11000) { // Duplicado
+      const field = Object.keys(error.keyValue)[0];
+      invalidFields[field] = true; // Marcamos el campo duplicado
+      return res.status(400).render('registro', {
+        errorMessage: `El ${field} ingresado ya está en uso.`, // Mensaje amigable
+        formData,
+        invalidFields,
+      });
+    } else if (error.name === 'ValidationError') {
+      // Agrupamos los errores de validación
+      Object.keys(error.errors).forEach((field) => {
+        invalidFields[field] = true; // Marcamos cada campo inválido
+      });
+      return res.status(400).render('registro', {
+        errorMessage: 'Hay errores en el formulario, por favor revisa los campos resaltados.', // Mensaje amigable
+        formData,
+        invalidFields,
+      });
     }
-  },
+
+    // Mensaje genérico para otros errores
+    return res.status(400).render('registro', {
+      errorMessage: 'Ocurrió un error al procesar el formulario, por favor intenta nuevamente.',
+      formData,
+      invalidFields,
+    });
+  }
+},
+
 
   listar: async (req, res) => {
     try {
