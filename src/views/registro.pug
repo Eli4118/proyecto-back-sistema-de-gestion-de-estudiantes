@@ -1,67 +1,126 @@
-extends index 
-block content 
-    .container.mt-5 
+extends index
+block content
+    .container.mt-5
       h1.text-center Registro de Usuario
 
+      //- Mensaje de éxito
+      if successMessage
+        .alert.alert-success
+          | #{successMessage}
+      
+      //- Mensaje de error
+      if errorMessage
+        .alert.alert-danger
+          | #{errorMessage}
+
       // Formulario con clases de Bootstrap
-      form(action="/usuarios" method="POST" class="needs-validation" novalidate)
+      form(action="/usuarios" method="POST" class="needs-validation" novalidate onsubmit="return validateForm(this);")
+        .form-group
+          label(for="rol") Rol:
+          select.form-control(name="rol" id="rol" required onchange="toggleAdditionalFields();" class=(invalidFields.rol ? 'is-invalid' : (formData.rol ? 'is-valid' : '')))
+            option(value="" disabled selected) Selecciona un rol
+            option(value="estudiante" selected=formData.rol === 'estudiante') Estudiante
+            option(value="profesor" selected=formData.rol === 'profesor') Profesor
+            option(value="tutor" selected=formData.rol === 'tutor') Tutor
+            option(value="administrativo" selected=formData.rol === 'administrativo') Administrativo
+          div.invalid-feedback El rol es obligatorio.
+
         .form-group
           label(for="nombres") Nombres:
-          input.form-control(type="text" name="nombres" required placeholder="Juan Carlos")
+          input.form-control(type="text" name="nombres" required placeholder="Juan Carlos" value=formData.nombres || '' class=(invalidFields.nombres ? 'is-invalid' : (formData.nombres ? 'is-valid' : '')))
           div.invalid-feedback El nombre es obligatorio y solo puede contener letras y espacios.
         
         .form-group
           label(for="apellidos") Apellidos:
-          input.form-control(type="text" name="apellidos" required placeholder="Pérez López")
+          input.form-control(type="text" name="apellidos" required placeholder="Pérez López" value=formData.apellidos || '' class=(invalidFields.apellidos ? 'is-invalid' : (formData.apellidos ? 'is-valid' : '')))
           div.invalid-feedback El apellido es obligatorio y solo puede contener letras y espacios.
 
         .form-group
           label(for="edad") Edad:
-          input.form-control(type="number" name="edad" min="1" max="99" required)
+          input.form-control(type="number" name="edad" placeholder="25" min="1" max="99" required value=formData.edad || '' class=(invalidFields.edad ? 'is-invalid' : (formData.edad ? 'is-valid' : '')))
           div.invalid-feedback La edad debe ser entre 1 y 99.
 
         .form-group
           label(for="correo") Correo Electrónico:
-          input.form-control(type="email" name="correo" required placeholder="example@email.com")
+          input.form-control(type="email" name="correo" required placeholder="example@email.com" value=formData.correo || '' class=(invalidFields.correo ? 'is-invalid' : (formData.correo ? 'is-valid' : '')))
           div.invalid-feedback El correo electrónico no es válido o es obligatorio.
 
         .form-group
           label(for="dni") DNI:
-          input.form-control(type="number" name="dni" required placeholder="12345678")
+          input.form-control(type="number" name="dni" required placeholder="12345678" value=formData.dni || '' class=(invalidFields.dni ? 'is-invalid' : (formData.dni ? 'is-valid' : '')))
           div.invalid-feedback El DNI es obligatorio y debe ser un número válido.
 
-        .form-group
-          label(for="rol") Rol:
-          select.form-control(name="rol" required)
-            option(value="" disabled selected) Selecciona un rol
-            option(value="estudiante") Estudiante
-            option(value="profesor") Profesor
-            option(value="tutor") Tutor
-            option(value="administrativo") Administrativo
-          div.invalid-feedback El rol es obligatorio.
+        //- Sección de datos del padre, oculta por defecto
+        .additional-fields(id="parentFields" style="display:none")
+          .form-group
+            label(for="curso") Curso:
+            select.form-control(name="curso" id="curso" required onchange="toggleAdditionalFields();" class=(invalidFields.rol ? 'is-invalid' : (formData.rol ? 'is-valid' : '')))
+              option(value="" disabled selected) Selecciona un Curso
+              option(value="1" selected=formData.curso  === '1') 1°
+              option(value="2" selected=formData.curso  === '2') 2°
+              option(value="3" selected=formData.curso  === '3') 3°
+              option(value="4" selected=formData.curso  === '4') 4°
+              option(value="5" selected=formData.curso  === '5') 5°
+              option(value="6" selected=formData.curso  === '6') 6°
+            div.invalid-feedback El Curso es obligatorio.
+            
+          .form-group
+            label(for="turno") Turno :
+            select.form-control(name="turno" id="turno" required onchange="toggleAdditionalFields();" class=(invalidFields.rol ? 'is-invalid' : (formData.rol ? 'is-valid' : '')))
+              option(value="" disabled selected) Selecciona un Turno
+              option(value="maniana" selected=formData.turno === 'maniana') Mañana
+              option(value="tarde" selected=formData.turno === 'tarde') Tarde
+            div.invalid-feedback El Turno es obligatorio.
 
-        .form-group
-          label(for="curso") Curso:
-          input.form-control(type="text" name="curso" placeholder="Curso al que pertenece")
-          div.invalid-feedback El curso es obligatorio.
+          .form-group
+            label(for="division") Division:
+            input.form-control(type="text" name="division" placeholder="division" value=formData.padreApellido || '' class=(invalidFields.padreApellido ? 'is-invalid' : (formData.padreApellido ? 'is-valid' : '')))
+            div.invalid-feedback La Division es obligatoria y solo puede contener letras y espacios.
 
-        button.btn.btn-primary(type="submit") Registrar
+
+        // Cambiar el texto del botón según el rol
+        button.btn.btn-primary(type="submit" id="submitBtn") Registrar
 
     // Validaciones personalizadas de Bootstrap
     script.
-      // Validación personalizada de Bootstrap
-      (function() {
-        'use strict';
-        window.addEventListener('load', function() {
-          var forms = document.getElementsByClassName('needs-validation');
-          Array.prototype.filter.call(forms, function(form) {
-            form.addEventListener('submit', function(event) {
-              if (form.checkValidity() === false) {
-                event.preventDefault();
-                event.stopPropagation();
-              }
-              form.classList.add('was-validated');
-            }, false);
-          });
-        }, false);
-      })();
+      function validateForm(form) {
+        let isValid = true;
+        Array.prototype.forEach.call(form.elements, function(input) {
+          if (input.checkValidity()) {
+            input.classList.add('is-valid');
+            input.classList.remove('is-invalid');
+          } else {
+            input.classList.add('is-invalid');
+            isValid = false;
+          }
+        });
+        return isValid; // Impide el envío del formulario si hay un campo inválido
+      }
+
+    // Script para mostrar u ocultar campos adicionales
+
+
+    script.
+      function toggleAdditionalFields() {
+        var rol = document.getElementById("rol").value;
+        var parentFields = document.getElementById("parentFields");
+        var submitBtn = document.getElementById("submitBtn");
+
+        if (rol === "estudiante") {
+          parentFields.style.display = "block";
+          submitBtn.innerText = "Siguiente";
+        } else {
+          parentFields.style.display = "none";
+          submitBtn.innerText = "Registrar";
+        }
+      }     
+
+    // Script para hacer desaparecer el mensaje después de 3 segundos
+    script.
+      setTimeout(function() {
+        var alert = document.querySelector('.alert');
+        if (alert) {
+          alert.style.display = 'none';
+        }
+      }, 3000)  // 3000 milisegundos = 3 segundos
+
