@@ -4,6 +4,10 @@ const path = require('path');
 const conectarDB = require('./src/config/db.js'); // Importar la función de conexión a la base de datos
 const router = require('./src/routers/indexRoutes.js');// importa Archivo de rutas principal
 
+//PREGUNTAR AL PROFE
+//ver si necesitamos rutas para api
+//preguntar si necesitamos poner camaras 
+
 // Conectar a la base de datos
 conectarDB();
 
