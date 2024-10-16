@@ -3,7 +3,7 @@ const app = express();
 const path = require('path'); 
 const conectarDB = require('./src/config/db.js'); // Importar la función de conexión a la base de datos
 const router = require('./src/routers/indexRoutes.js');// importa Archivo de rutas principal
-
+const sessionData = require('./src/middleware/sessionData.js')
 //PREGUNTAR AL PROFE
 //ver si necesitamos rutas para api
 //preguntar si necesitamos poner camaras 
@@ -22,7 +22,8 @@ app.set('views', path.join(__dirname, 'src/views')); // Carpeta donde estarán l
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// seccion de rutas y middlewares 
+// Usa el middleware de sessionData antes de las rutas
+app.use(sessionData);
 // Usa el archivo router que incluye la ruta de estudiantes
 app.use(router);
 

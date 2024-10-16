@@ -7,14 +7,14 @@ block content
         //- Título del formulario de inicio de sesión
         h3.text-center.mb-4 Login
         
-        //- Formulario de inicio de sesión
-        form
+        //- Formulario de inicio de sesión que envía los datos con POST
+        form(action="/login" method="POST") 
           .mb-3
-            label(for="email") Email Address
+            label(for="correo") Email Address
             .input-group
               span.input-group-text
                 i(class="bi bi-envelope")  
-              input.form-control(type="email" name="email" placeholder="Username@gmail.com" required)
+              input.form-control(type="email" name="correo" placeholder="Username@gmail.com" required)
 
           .mb-3
             label(for="password") Password
