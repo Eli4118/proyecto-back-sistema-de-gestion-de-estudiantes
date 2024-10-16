@@ -20,7 +20,19 @@ router.get('/registro', (req, res) => {
       successMessage: '', // Inicialmente no hay mensajes de éxito
     })
   })
-  
+
+router.get('/registro-tutor', (req, res) => {
+    //const estudianteId = req.session.estudianteId;
+    const formData = {};
+    const invalidFields = {};
+    res.render('registroTutor', { //estudianteId,
+      formData,
+      invalidFields,
+      errorMessage: '', // Inicialmente no hay mensajes de error
+      successMessage: '', // Inicialmente no hay mensajes de éxito
+     });
+  });
+
 // Usa estudianteRouter bajo la ruta '/usuarios'
 router.use('/usuarios', usuariosRouter);
 
