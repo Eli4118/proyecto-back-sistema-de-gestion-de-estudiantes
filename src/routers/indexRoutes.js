@@ -13,20 +13,6 @@ router.get('/registro',verificarRol(['administrativo']), (req, res, next) => {
     res.render("registro")
 })
 
-/* router.get('/registro', (req, res) => {
-    // Inicializamos formData y invalidFields para la vista inicial
-    const formData = {};
-    const invalidFields = {};
-    
-    // Renderizamos la vista de registro
-    res.render('registro', {
-      formData,
-      invalidFields,
-      errorMessage: '', // Inicialmente no hay mensajes de error
-      successMessage: '', // Inicialmente no hay mensajes de éxito
-    })
-  }) */
-
 router.get('/registro-tutor', (req, res) => {
     //const estudianteId = req.session.estudianteId;
     const formData = {};

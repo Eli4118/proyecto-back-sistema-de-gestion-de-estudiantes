@@ -1,51 +1,32 @@
 const { model } = require("mongoose");
 const Usuario = require('../models/usuarios'); // Importa el esquema base
 const UsuarioController = {
-
   registro: async (req, res) => {
     try {
-      // Extraer el rol del cuerpo de la solicitud
-      const { rol } = req.body;
+      console.log(req.body);  // Ver qué datos están llegando
+      console.log("Rol recibido:", req.body.rol);  // Asegúrate de que el rol está presente
   
-      // Crear un nuevo usuario
-      const usuario = new Usuario(req.body);
-      await usuario.save(); // Esto desencadenará las validaciones
+      const { rol, dniTutor, ...usuarioData } = req.body;  // Extraer el rol y dni del tutor
+      usuarioData.rol = rol;  // Asegurarse de que el rol se incluya en usuarioData
   
-      // Si el rol es 'estudiante', redirigir a la página de registro del tutor
+      const usuario = new Usuario(usuarioData);  // Crear el nuevo usuario con los datos
       if (rol === 'estudiante') {
-        return res.redirect('/registro-tutor');
+        const tutor = await Usuario.findOne({ dni: dniTutor, rol: 'tutor' });  // Buscar tutor por DNI
+        if (tutor) {
+          usuario.tutorId = tutor._id;  // Asignar ID del tutor al estudiante
+        } else {
+          usuario.tutorId = null;  // Si no hay tutor, asignar null
+        }
       }
   
-      // Redirigimos a la vista de registro, con un mensaje de éxito para otros roles
-      res.status(201).render('registro', {
-        successMessage: 'Usuario creado exitosamente',
-        formData: {}, 
-        invalidFields: {}
-      });
+      // Guardar el usuario en la base de datos
+      await usuario.save();
+  
+      return res.status(201).json({ message: 'Usuario registrado exitosamente', usuario });
     } catch (error) {
-      const formData = req.body; // Datos ingresados por el usuario
-      const invalidFields = {}; // Objeto para mantener el estado de los campos inválidos
+      console.error('Error al registrar usuario:', error);
   
-      // Verifica si hay campos que están mal y márcalos como inválidos
-      if (error.code === 11000) { // Error de duplicado
-        const field = Object.keys(error.keyValue)[0];
-        invalidFields[field] = true; // Marcamos el campo duplicado
-        return res.status(400).render('registro', {
-          errorMessage: `El ${field} ingresado ya está en uso.`,
-          formData,
-          invalidFields,
-        });
-      } else if (error.name === 'ValidationError') {
-        // Agrupamos los errores de validación
-        Object.keys(error.errors).forEach((field) => {
-          invalidFields[field] = true; // Marcamos cada campo inválido
-        });
-        return res.status(400).render('registro', {
-          errorMessage: 'Hay errores en el formulario, por favor revisa los campos resaltados.',
-          formData,
-          invalidFields,
-        });
-      }
+      return res.status(400).json({ message: 'Error al registrar usuario', error: error.message });
     }
   },
 
