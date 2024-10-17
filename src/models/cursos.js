@@ -1,11 +1,5 @@
 const mongoose = require('mongoose');
 
-// Esquema para cursos
-const Cursos = mongoose.model('Curso', CursoSchema);
-module.exports = Curso;
-
-const mongoose = require('mongoose');
-
 const CursoSchema = new mongoose.Schema({
 
   grado: {
@@ -29,16 +23,22 @@ const CursoSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Materia', // Cada curso puede tener varias materias
   }],
-  profesor: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Usuario',    
-  }],
+
   estudiantes: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Usuario' // Relaciona a los estudiantes que están inscritos en este curso//controlar hasta 30 por curso
+    ref: 'Usuario', // Relaciona a los estudiantes que están inscritos en este curso//controlar hasta 30 por curso
+    validate: {
+      validator: function (v) {
+        return v.length <= 30;
+      },
+      message: 'El curso no puede tener más de 30 estudiantes'
+    }
   }]
 });
 
 const Curso = mongoose.model('Curso', CursoSchema);
 
 module.exports = Curso;
+
+
+

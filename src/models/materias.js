@@ -12,10 +12,10 @@ const MateriaSchema = new mongoose.Schema({
       message: 'El nombre de la materia solo puede contener letras y espacios'
     }
   },
-  profesores: [{
+  profesor: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Usuario', // Cada materia puede tener varios profesores
-  }],
+    ref: 'Usuario', // Relaciona la materia con el profesor que la dicta
+  },
   curso: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Curso', // La materia está vinculada a un curso
@@ -35,10 +35,6 @@ const MateriaSchema = new mongoose.Schema({
       required: true // Formato de 24 horas, por ejemplo, '16:00'
     }
   },
-  estudiantes: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Usuario' // Relaciona los estudiantes que están cursando esta materia
-  }]
 });
 
 const Materia = mongoose.model('Materia', MateriaSchema);

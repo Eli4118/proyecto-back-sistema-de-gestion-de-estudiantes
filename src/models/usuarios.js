@@ -79,8 +79,14 @@ const UsuarioSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Usuario', // Referencia al mismo esquema Usuario
     default: [] // Array vacío si no hay estudiantes a cargo
-  }]  
+  }],
 
+  // Campos específicos para "estudiantes"
+  dniTutor: { // DNI del tutor para facilitar la búsqueda
+    type: Number,
+    // Esto puede ser opcional, puedes decidir si es obligatorio o no
+  },
+  
 });
 
 
