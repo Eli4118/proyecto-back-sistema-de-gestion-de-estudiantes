@@ -11,12 +11,14 @@ const UsuarioController = {
   
       const usuario = new Usuario(usuarioData);  // Crear el nuevo usuario con los datos
       if (rol === 'estudiante') {
+        //aca se puede hacer la conexion entre estudiante y curso (buscar curso por año y turno)
+        //inscribirCurso(año, turno, dni);
         const tutor = await Usuario.findOne({ dni: dniTutor, rol: 'tutor' });  // Buscar tutor por DNI
         if (tutor) {
           usuario.tutorId = tutor._id;  // Asignar ID del tutor al estudiante
         } else {
           usuario.tutorId = null;  // Si no hay tutor, asignar null
-        }
+        }        
       }
   
       // Guardar el usuario en la base de datos
@@ -108,8 +110,7 @@ const UsuarioController = {
       res.status(500).json({ message: 'Error al eliminar el usuario', error: error.message });
     }
   }
-  
-  
+    
 };
 
 
