@@ -1,7 +1,7 @@
 let usuariosAutenticado = null;
 
 function setUsuarioAutenticado(usuario) {
-    usuariosAutenticado = usuario;
+    usuariosAutenticado = usuario;   
 }
 
 function getUsuarioAutenticado() {

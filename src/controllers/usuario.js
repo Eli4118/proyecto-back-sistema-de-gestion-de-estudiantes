@@ -1,12 +1,7 @@
 const { model } = require("mongoose");
 const Usuario = require('../models/usuarios'); // Importa el esquema base
 const UsuarioController = {
-<<<<<<< HEAD
-  
-=======
 
-
->>>>>>> 62157e149132734b25f5b9b68f9127c7be00e961
   registro: async (req, res) => {
     try {
       // Extraer el rol del cuerpo de la solicitud
@@ -53,8 +48,6 @@ const UsuarioController = {
       }
     }
   },
-  
-
 
   listar: async (req, res) => {
     try {
