@@ -1,5 +1,6 @@
 const express = require('express');
 const usuariosRouter = require('./usuarios');//importando la ruta 
+const profesorRouter = require('./profesor')
 const sesionRouter = require('./sesion')
 const verificarRol = require('../middleware/verificarRol')
 const router = express.Router();
@@ -14,6 +15,7 @@ router.get('/registro',(req, res, next) => {
 })
 
 
+router.use('/profesor', profesorRouter)
 // Usa estudianteRouter bajo la ruta '/usuarios'
 router.use('/usuarios', usuariosRouter);
 

@@ -1,0 +1,12 @@
+h1 Cursos y Materias
+
+//- Verificar si hay cursos disponibles
+if cursos.length > 0
+  each curso in cursos
+    h2= `Curso: ${curso.grado} ${curso.nivel} - División: ${curso.division}`
+    ul
+      each materia in curso.materias
+        li= `Materia: ${materia.nombre}`
+else
+  h2= mensaje 
+  //- Mostrar mensaje si no hay cursos

@@ -48,13 +48,7 @@ const UsuarioSchema = new mongoose.Schema({
     type: Number,
     // Esto puede ser opcional, puedes decidir si es obligatorio o no
   },
-  curso: {
-    type: String,
-    // Puedes hacer que sea requerido solo si el rol es 'estudiante'
-    required: function() {
-      return this.rol === 'estudiante'; // Solo requerido si el rol es estudiante
-    }
-  },
+  
 });
 
 
