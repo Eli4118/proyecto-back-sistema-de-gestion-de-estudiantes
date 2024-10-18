@@ -15,38 +15,43 @@ block content
     tbody
       each materia in materias
         each estudiante in materia.curso.estudiantes
-          tr
+          tr(data-estudiante-id=estudiante._id data-materia-id=materia._id)
             td= materia.curso.grado + ' ' + materia.curso.division
             td= materia.nombre
             td= estudiante.nombres + ' ' + estudiante.apellidos
             td= estudiante.dni
-            td= estudiante.nota  
+            td.nota-columna= estudiante.nota != 'no hay nota' ? estudiante.nota : 'Sin nota'
             td
-              //- Formulario oculto para cargar la nota
-              form(action="/profesor" method="POST" onsubmit="return cargarNota(this);")
+              //- Formulario para cargar o actualizar la nota
+              form(action="/profesor" method="POST" onsubmit="return manejarNota(this);")
                 input(type="hidden" name="estudianteId" value=estudiante._id)
                 input(type="hidden" name="materiaId" value=materia._id)
+                input(type="hidden" name="notaActual" value= estudiante.nota != 'no hay nota' ? estudiante.nota : '')
                 .input-group
-                  input.form-control(type="number" name="calificacion" placeholder="Calificación" required min="0" max="10")
+                  input.form-control(type="number" name="calificacion" value= estudiante.nota != 'no hay nota' ? estudiante.nota : '' placeholder="Calificación" required min="0" max="10")
                   select.form-control(name="tipoEvaluacion" required)
-                    option(value="Parcial") Parcial
-                    option(value="Final") Final
-                    option(value="Tarea") Tarea
-                    option(value="Examen") Examen
-                    option(value="Otro") Otro
-                  input.form-control(type="text" name="observaciones" placeholder="Observaciones")
-                  button.btn.btn-primary(type="submit") Cargar Nota
+                    option(value="Parcial" selected=estudiante.tipoEvaluacion == "Parcial") Parcial
+                    option(value="Final" selected=estudiante.tipoEvaluacion == "Final") Final
+                    option(value="Tarea" selected=estudiante.tipoEvaluacion == "Tarea") Tarea
+                    option(value="Examen" selected=estudiante.tipoEvaluacion == "Examen") Examen
+                    option(value="Otro" selected=estudiante.tipoEvaluacion == "Otro") Otro
+                  input.form-control(type="text" name="observaciones" placeholder="Observaciones" value= estudiante.observaciones || '')
+                  button.btn(type="submit" class= estudiante.nota == 'no hay nota' ? 'btn-success' : 'btn-warning') 
+                    = estudiante.nota == 'no hay nota' ? 'Cargar Nota' : 'Actualizar Nota'
 
     script.
-      function cargarNota(form) {
+      function manejarNota(form) {
         const formData = new FormData(form);
         const data = {};
         formData.forEach((value, key) => {
           data[key] = value;
         });
 
+        // Cambia el método dependiendo de si hay o no una nota
+        const method = form.notaActual.value ? 'PUT' : 'POST';
+
         fetch(form.action, {
-          method: 'POST',
+          method: method, // Establecer método dinámico
           headers: {
             'Content-Type': 'application/json',
           },
@@ -55,13 +60,23 @@ block content
         .then(response => response.json())
         .then(data => {
           if (data.success) {
-            // Aquí puedes manejar la respuesta si es exitosa, como recargar la página o mostrar un mensaje
-            window.location.reload(); // Recargar la página para ver la nueva nota
+            // Actualizar la nota en la tabla sin recargar la página
+            const row = document.querySelector(`tr[data-estudiante-id="${data.nota.estudiante}"][data-materia-id="${data.nota.materia}"]`);
+            if (row) {
+              const notaColumna = row.querySelector('.nota-columna');
+              notaColumna.textContent = data.nota.calificacion;
+
+              // Cambiar el botón a "Actualizar Nota"
+              const button = row.querySelector('button');
+              button.textContent = 'Actualizar Nota';
+              button.classList.remove('btn-success'); // Eliminar clase de cargar
+              button.classList.add('btn-warning'); // Agregar clase de actualizar
+            }
           } else {
-            alert(data.message); // Mostrar mensaje de error
+            alert(data.message);
           }
         })
         .catch(error => console.error('Error:', error));
-        
-        return false; // Evitar el envío del formulario
+
+        return false; // Evita el envío tradicional del formulario
       }

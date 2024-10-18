@@ -165,11 +165,48 @@ async function cargarNota(req, res) {
     await nuevaNota.save();
  
      // Renderizar la vista con los datos actualizados
-     res.redirect('/profesor');// Cambia esto a la ruta correspondiente
+    // res.redirect('/profesor');// Cambia esto a la ruta correspondiente
+    res.status(200).json({ success: true, nota: nuevaNota });
+
   } catch (error) {
     console.error(error);
     res.status(500).send('Error al cargar la nota.');
   }
 }
 
-module.exports = { verNotas, cargarNota, obtenerCursosYMaterias  };
+async function modificarNota(req, res) {
+  try {
+    const { estudianteId, materiaId, calificacion, tipoEvaluacion, observaciones } = req.body;
+
+    // Buscar la nota existente por estudiante y materia
+    const notaExistente = await Nota.findOne({ estudiante: estudianteId, materia: materiaId });
+
+    // Si no existe la nota, devolver un error
+    if (!notaExistente) {
+      return res.status(404).send('No se encontró la nota para este estudiante y materia.');
+    }
+
+    // Solo actualizar los campos que fueron proporcionados en la solicitud
+    if (calificacion !== undefined) notaExistente.calificacion = calificacion;
+    if (tipoEvaluacion !== undefined) notaExistente.tipoEvaluacion = tipoEvaluacion;
+    if (observaciones !== undefined) notaExistente.observaciones = observaciones;
+
+    // Validar que la calificación esté en el rango permitido, si es que se proporcionó
+    if (notaExistente.calificacion < 0 || notaExistente.calificacion > 10) {
+      return res.status(400).send('La calificación debe estar entre 0 y 10.');
+    }
+
+    // Guardar los cambios en la base de datos
+    await notaExistente.save();
+
+    // Responder con la nota actualizada
+    res.status(200).json({ success: true, nota: notaExistente });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error al modificar la nota.');
+  }
+}
+
+
+module.exports = { verNotas, cargarNota, obtenerCursosYMaterias ,modificarNota };
