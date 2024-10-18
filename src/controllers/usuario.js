@@ -1,33 +1,33 @@
 const { model } = require("mongoose");
 const Usuario = require('../models/usuarios'); // Importa el esquema base
+const { registrarEstudiante, registrarTutor, registrarProfesor, registrarAdministrador } = require('./funciones/registroRoles');
 const UsuarioController = {
   registro: async (req, res) => {
     try {
-      console.log(req.body);  // Ver qué datos están llegando
-      console.log("Rol recibido:", req.body.rol);  // Asegúrate de que el rol está presente
+      const { rol, ...usuarioData } = req.body;
   
-      const { rol, dniTutor, ...usuarioData } = req.body;  // Extraer el rol y dni del tutor
-      usuarioData.rol = rol;  // Asegurarse de que el rol se incluya en usuarioData
+      let nuevoUsuario;
   
-      const usuario = new Usuario(usuarioData);  // Crear el nuevo usuario con los datos
-      if (rol === 'estudiante') {
-        //aca se puede hacer la conexion entre estudiante y curso (buscar curso por año y turno)
-        //inscribirCurso(año, turno, dni);
-        const tutor = await Usuario.findOne({ dni: dniTutor, rol: 'tutor' });  // Buscar tutor por DNI
-        if (tutor) {
-          usuario.tutorId = tutor._id;  // Asignar ID del tutor al estudiante
-        } else {
-          usuario.tutorId = null;  // Si no hay tutor, asignar null
-        }        
+      switch (rol) {
+        case 'estudiante':
+          nuevoUsuario = await registrarEstudiante(usuarioData);
+          break;
+        case 'tutor':
+          nuevoUsuario = await registrarTutor(usuarioData);
+          break;
+        case 'profesor':
+          nuevoUsuario = await registrarProfesor(usuarioData);
+          break;
+        case 'administrador':
+          nuevoUsuario = await registrarAdministrador(usuarioData);
+          break;
+        default:
+          return res.status(400).json({ message: 'Rol no válido' });
       }
   
-      // Guardar el usuario en la base de datos
-      await usuario.save();
-  
-      return res.status(201).json({ message: 'Usuario registrado exitosamente', usuario });
+      return res.status(201).json({ message: 'Usuario registrado exitosamente', usuario: nuevoUsuario });
     } catch (error) {
       console.error('Error al registrar usuario:', error);
-  
       return res.status(400).json({ message: 'Error al registrar usuario', error: error.message });
     }
   },
@@ -43,9 +43,10 @@ const UsuarioController = {
     }
   },
 
-  buscarPorDni: async (req, res) => {
+  /*buscarPorDni: async (req, res) => {
     try {
-      const usuario = await Usuario.findOne({ dni: req.params.dni })//nombre del atributo:dato que viene en la request
+      const usuario = await Usuario.findOne({ dni: req.params.dni })
+      console.log(usuario);
       if (usuario) {
         res.status(200).json(usuario);
         
@@ -57,7 +58,62 @@ const UsuarioController = {
       res.status(500).json({ message: 'Error al obtener el usuario', error: error.message });
     }
  
+  },*/
+  buscarPorDni: async (req, res) => {
+    try {
+      const dni = req.params.dni;
+      const usuario = await Usuario.findOne({ dni })
+        .populate('tutores', 'nombres apellidos dni') // Poblar tutores
+        .populate('estudiantes', 'nombres apellidos dni') // Poblar estudiantes
+        .exec();
+  
+      // Si el usuario se encuentra
+      if (usuario) {
+        // Actualizar relaciones si es estudiante y tiene tutores asociados
+        if (usuario.rol === 'estudiante' && usuario.dniTutor.length > 0) {
+          const tutores = await Usuario.find({ dni: { $in: usuario.dniTutor }, rol: 'tutor' });
+  
+          // Asignar los tutores al estudiante si no están ya relacionados
+          if (!usuario.tutores.length) {
+            usuario.tutores = tutores.map(tutor => tutor._id);
+            await usuario.save();
+  
+            // Actualizar los tutores para incluir el estudiante
+            await Usuario.updateMany(
+              { _id: { $in: tutores.map(tutor => tutor._id) } },
+              { $addToSet: { estudiantes: usuario._id } }
+            );
+          }
+        }
+  
+        // Actualizar relaciones si es tutor y tiene estudiantes asociados
+        if (usuario.rol === 'tutor' && usuario.dniEstudiantes.length > 0) {
+          const estudiantes = await Usuario.find({ dni: { $in: usuario.dniEstudiantes }, rol: 'estudiante' });
+  
+          // Asignar los estudiantes al tutor si no están ya relacionados
+          if (!usuario.estudiantes.length) {
+            usuario.estudiantes = estudiantes.map(estudiante => estudiante._id);
+            await usuario.save();
+  
+            // Actualizar los estudiantes para incluir el tutor
+            await Usuario.updateMany(
+              { _id: { $in: estudiantes.map(estudiante => estudiante._id) } },
+              { $addToSet: { tutores: usuario._id } }
+            );
+          }
+        }
+  
+        console.log(usuario);  
+        return res.status(200).json(usuario);
+      } else {
+        return res.status(404).json({ message: 'Usuario no encontrado' });
+      }
+    } catch (error) {
+      return res.status(500).json({ message: 'Error al obtener el usuario', error: error.message });
+    }
   },
+  
+  
   listarPorRol: async (req, res)=> {
     const { rol } = req.params; // Suponiendo que el rol viene como parámetro en la URL
     try {

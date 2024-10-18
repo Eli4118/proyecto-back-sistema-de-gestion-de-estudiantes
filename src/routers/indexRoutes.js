@@ -13,7 +13,9 @@ router.get('/', (req, res, next) => {
 router.get('/registro',(req, res, next) => {
     res.render("registro")
 })
-
+router.get('/registroTutor', (req, res) => {
+  res.render('formularioTutor'); // Renderiza formularioTutor.pug
+});
 
 router.use('/profesor', profesorRouter)
 // Usa estudianteRouter bajo la ruta '/usuarios'

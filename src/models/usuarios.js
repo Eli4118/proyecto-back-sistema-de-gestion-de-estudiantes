@@ -43,6 +43,44 @@ const UsuarioSchema = new mongoose.Schema({
     required: [true, 'El DNI es obligatorio'],
     unique: true,
   },
+
+  curso: {
+    type: String,
+    // Puedes hacer que sea requerido solo si el rol es 'estudiante'
+    required: function() {
+      return this.rol === 'estudiante'; // Solo requerido si el rol es estudiante
+    }
+  },
+  turno: { 
+    type: String, 
+    required: function() {
+      return this.rol === 'estudiante'; // Solo requerido si el rol es estudiante
+    }
+  },
+
+  // DNI de los tutores (para estudiantes) 
+  dniTutor: [{ 
+    type: Number, // Guardar el DNI del tutor como número
+  }],
+
+  // DNI de los tutores (para tutores) 
+  dniEstudiantes: [{ 
+    type: Number, // Guardar el DNI del tutor como número
+  }],
+  // Relación del estudiante con sus tutores (muchos tutores)
+  tutores: [{ 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Usuario', // Referencia al mismo esquema Usuario
+    default: [] // Array vacío si no hay tutores
+  }],
+
+  // Relación del tutor con sus estudiantes (muchos estudiantes)
+  estudiantes: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Usuario', // Referencia al mismo esquema Usuario
+    default: [] // Array vacío si no hay estudiantes a cargo
+  }],
+
   // Campos específicos para "estudiantes"
   dniTutor: { // DNI del tutor para facilitar la búsqueda
     type: Number,

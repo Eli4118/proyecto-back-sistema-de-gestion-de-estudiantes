@@ -1,43 +1,26 @@
-extends index 
-block content 
-    .container.mt-5 
-      h1.text-center Registro de Tutor
 
-      //- Mensaje de éxito
-      if successMessage
-        .alert.alert-success
-          | #{successMessage}
-      
-      //- Mensaje de error
-      if errorMessage
-        .alert.alert-danger
-          | #{errorMessage}
+// Formulario del tutor
+form(action="/usuarios" method="POST")
+  // Aquí pones los campos necesarios para el tutor
+  .form-group
+    label(for="nombres") Nombres:
+    input(type="text" name="nombres" required placeholder="Juan Carlos")
 
-      // Formulario del tutor
-      form(action="/usuarios" method="POST" class="needs-validation" novalidate)
-        // Aquí pones los campos necesarios para el tutor
-        .form-group
-          label(for="nombres") Nombres:
-          input.form-control(type="text" name="nombres" required placeholder="Juan Carlos" value=formData.nombres || '' class=(invalidFields.nombres ? 'is-invalid' : (formData.nombres ? 'is-valid' : '')))
-          div.invalid-feedback El nombre es obligatorio y solo puede contener letras y espacios.
-        
-        .form-group
-          label(for="apellidos") Apellidos:
-          input.form-control(type="text" name="apellidos" required placeholder="Pérez López" value=formData.apellidos || '' class=(invalidFields.apellidos ? 'is-invalid' : (formData.apellidos ? 'is-valid' : '')))
-          div.invalid-feedback El apellido es obligatorio y solo puede contener letras y espacios.
+  .form-group
+    label(for="apellidos") Apellidos:
+    input(type="text" name="apellidos" required placeholder="Pérez López")
 
-        .form-group
-          label(for="edad") Edad:
-          input.form-control(type="number" name="edad" min="1" max="99" required value=formData.edad || '' class=(invalidFields.edad ? 'is-invalid' : (formData.edad ? 'is-valid' : '')))
-          div.invalid-feedback La edad debe ser entre 1 y 99.
+  .form-group
+    label(for="edad") Edad:
+    input(type="number" name="edad" min="1" max="99" required)
 
-        .form-group
-          label(for="correo") Correo Electrónico:
-          input.form-control(type="email" name="correo" required placeholder="example@email.com" value=formData.correo || '' class=(invalidFields.correo ? 'is-invalid' : (formData.correo ? 'is-valid' : '')))
-          div.invalid-feedback El correo electrónico no es válido o es obligatorio.
+  .form-group
+    label(for="correo") Correo Electrónico:
+    input(type="email" name="correo" required placeholder="example@email.com")
 
-        .form-group
-          label(for="dni") DNI:
-          input.form-control(type="number" name="dni" required placeholder="12345678" value=formData.dni || '' class=(invalidFields.dni ? 'is-invalid' : (formData.dni ? 'is-valid' : '')))
-          div.invalid-feedback El DNI es obligatorio y debe ser un número válido.        
-        button.btn.btn-primary(type="submit") Registrar
+  .form-group
+    label(for="dni") DNI:
+    input(type="number" name="dni" required placeholder="12345678")
+
+  button(type="submit") Registrar
+

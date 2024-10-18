@@ -1,127 +1,111 @@
 extends index
+
 block content
-    .container.mt-5
-      h1.text-center Registro de Usuario
+  .container.mt-5
+    h1.text-center Registro de Usuario
 
-      //- Mensaje de éxito
-      if successMessage
-        .alert.alert-success
-          | #{successMessage}
+    //- Mensaje de éxito
+    if successMessage
+      .alert.alert-success
+        | #{successMessage}
+    
+    //- Mensaje de error
+    if errorMessage
+      .alert.alert-danger
+        | #{errorMessage}
+
+    // Formulario con clases de Bootstrap
+    form(action="/usuarios" method="POST" class="needs-validation" novalidate onsubmit="return validateForm(this);")
+      .form-group
+        label(for="rol") Rol:
+        select.form-control(name="rol" id="rol" required onchange="toggleAdditionalFields();")
+          option(value="" disabled selected) Selecciona un rol
+          option(value="estudiante") Estudiante
+          option(value="profesor") Profesor
+          option(value="tutor") Tutor
+          option(value="administrativo") Administrativo
+
+      .form-group
+        label(for="nombres") Nombres:
+        input.form-control(type="text" name="nombres" required placeholder="Juan Carlos")
       
-      //- Mensaje de error
-      if errorMessage
-        .alert.alert-danger
-          | #{errorMessage}
+      .form-group
+        label(for="apellidos") Apellidos:
+        input.form-control(type="text" name="apellidos" placeholder="Pérez López")
 
-      // Formulario con clases de Bootstrap
-      form(action="/usuarios" method="POST" class="needs-validation" novalidate onsubmit="return validateForm(this);")
+      .form-group
+        label(for="edad") Edad:
+        input.form-control(type="number" name="edad" placeholder="25")
+
+      .form-group
+        label(for="correo") Correo Electrónico:
+        input.form-control(type="email" name="correo" placeholder="example@email.com")
+
+      .form-group
+        label(for="dni") DNI:
+        input.form-control(type="number" name="dni" placeholder="12345678")
+
+      // Sección de datos del estudiante, oculta por defecto
+      .additional-fields(id="estudianteFields" style="display:none")
         .form-group
-          label(for="rol") Rol:
-          select.form-control(name="rol" id="rol" required onchange="toggleAdditionalFields();")
-            option(value="" disabled selected) Selecciona un rol
-            option(value="estudiante") Estudiante
-            option(value="profesor") Profesor
-            option(value="tutor") Tutor
-            option(value="administrativo") Administrativo
-
-        //.form-group
-          label(for="nombres") Nombres:
-          input.form-control(type="text" name="nombres" required placeholder="Juan Carlos" value=formData.nombres || '' class=(invalidFields.nombres ? 'is-invalid' : (formData.nombres ? 'is-valid' : '')))
-          div.invalid-feedback El nombre es obligatorio y solo puede contener letras y espacios.
+          label(for="curso") Curso:
+          select.form-control(name="curso" id="curso" required onchange="toggleAdditionalFields();" )
+            option(value="" disabled selected) Selecciona un Curso
+            option(value="1") 1°
+            option(value="2") 2°
+            option(value="3") 3°
+            option(value="4") 4°
+            option(value="5") 5°
+            option(value="6") 6°
+        
         .form-group
-          label(for="nombres") Nombres:
-          input.form-control(type="text" name="nombres" placeholder="Juan Carlos")
-        .form-group
-          label(for="apellidos") Apellidos:
-          input.form-control(type="text" name="apellidos" placeholder="Pérez López")
-        .form-group
-          label(for="edad") Edad:
-          input.form-control(type="number" name="edad" placeholder="25")
+          label(for="turno") Turno:
+          select.form-control(name="turno" id="turno" required onchange="toggleAdditionalFields();" )
+            option(value="" disabled selected) Selecciona un Turno
+            option(value="maniana") Mañana
+            option(value="tarde") Tarde
 
         .form-group
-          label(for="correo") Correo Electrónico:
-          input.form-control(type="email" name="correo" placeholder="example@email.com")
+          label(for="nivel") Nivel:
+          select.form-control(name="nivel" id="nivel" required onchange="toggleAdditionalFields();" )
+            option(value="" disabled selected) Selecciona un Nivel
+            option(value="primaria") Primaria
+            option(value="secundaria") Secundaria
 
         .form-group
-          label(for="dni") DNI:
-          input.form-control(type="number" name="dni" placeholder="12345678")
+          label(for="dniTutor") DNI del Tutor:
+          input.form-control(type="number" name="dniTutor" required placeholder="DNI del Tutor")
 
-        //- Sección de datos del padre, oculta por defecto
-        .additional-fields(id="parentFields" style="display:none")
-          .form-group
-            label(for="curso") Curso:
-            select.form-control(name="curso" id="curso" required onchange="toggleAdditionalFields();" )
-              option(value="" disabled selected) Selecciona un Curso
-              option(value="1") 1°
-              option(value="2" ) 2°
-              option(value="3" ) 3°
-              option(value="4" ) 4°
-              option(value="5" ) 5°
-              option(value="6" ) 6°
-            
-            
-          .form-group
-            label(for="turno") Turno :
-            select.form-control(name="turno" id="turno" required onchange="toggleAdditionalFields();" )
-              option(value="" disabled selected) Selecciona un Turno
-              option(value="maniana") Mañana
-              option(value="tarde" ) Tarde
-            
+        //include registroTutor.pug
+      // Sección de datos del tutor, oculta por defecto
+      .additional-fields(id="tutorFields" style="display:none")
+        // Aquí incluirías el formulario del tutor si es necesario
 
-          .form-group
-            label(for="nivel") Turno :
-            select.form-control(name="nivel" id="nivel" required onchange="toggleAdditionalFields();" )
-              option(value="" disabled selected) Selecciona un Nivel
-              option(value="primaria" ) Primaria
-              option(value="secundaria" ) Secundaria
-            
+        .form-group
+          label(for="dniEstudinte") DNI del Tutor:
+          input.form-control(type="number" name="dniEstudinte" required placeholder="DNI del Estudiante")
 
-          .form-group
-            label(for="division") Division:
-            input.form-control(type="text" name="division" placeholder="division" value= '' )
-            
-
-          .form-group
-              label(for="dniTutor") DNI del Tutor:
-              input.form-control(type="number" name="dniTutor" required placeholder="DNI del Tutor" value= '' )
-              
-
-        // Cambiar el texto del botón según el rol
-        button.btn.btn-primary(type="submit" id="submitBtn") Registrar
-
-    // Validaciones personalizadas de Bootstrap
-      script.
-        function validateForm(form) {
-          let isValid = true;
-          Array.prototype.forEach.call(form.elements, function(input) {
-            if (input.checkValidity()) {
-              input.classList.add('is-valid');
-              input.classList.remove('is-invalid');
-            } else {
-              input.classList.add('is-invalid');
-              isValid = false;
-            }
-          });
-          return isValid; // Impide el envío del formulario si hay un campo inválido
-        }
-
-    // Script para mostrar u ocultar campos adicionales
-
+        
+      // Botón submit
+      button.btn.btn-primary(type="submit" id="submitBtn") Registrar
 
     script.
       function toggleAdditionalFields() {
         var rol = document.getElementById("rol").value;
-        var parentFields = document.getElementById("parentFields");
-        var submitBtn = document.getElementById("submitBtn");
-
+        var parentFields = document.getElementById("estudianteFields");
+        var tutorFields = document.getElementById("tutorFields");
         if (rol === "estudiante") {
           parentFields.style.display = "block";
-          submitBtn.innerText = "Siguiente";
         } else {
           parentFields.style.display = "none";
-          submitBtn.innerText = "Registrar";
         }
-      }     
+
+        if (rol === "tutor") {
+          tutorFields.style.display = "block";
+        } else {
+          tutorFields.style.display = "none";
+        }       
+      }    
 
     // Script para hacer desaparecer el mensaje después de 3 segundos
     script.
@@ -131,4 +115,3 @@ block content
           alert.style.display = 'none';
         }
       }, 3000)  // 3000 milisegundos = 3 segundos
-
