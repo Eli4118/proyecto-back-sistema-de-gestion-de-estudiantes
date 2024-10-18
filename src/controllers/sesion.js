@@ -18,7 +18,8 @@ const SesionController = {
         } */
            // Simulación de sesión: Guardar el usuario en req
            setUsuarioAutenticado(usuario);
-          res.json({ mensaje: `Inicio de sesión exitoso como ${usuario.nombres}`, usuario });
+          //res.json({ mensaje: `Inicio de sesión exitoso como ${usuario.nombres}`, usuario });
+          res.redirect('/');
         } catch (error) {
         res.status(500).json({ mensaje: 'Error al iniciar sesión', error: error.message });
         }
@@ -27,7 +28,8 @@ const SesionController = {
     // cierre de sesión
     logout: (req, res) => {
         setUsuarioAutenticado(null); 
-        res.json({ mensaje: 'Cierre de sesión exitoso' });
+       // res.json({ mensaje: 'Cierre de sesión exitoso' });
+       res.redirect('/');
     },
 
 }

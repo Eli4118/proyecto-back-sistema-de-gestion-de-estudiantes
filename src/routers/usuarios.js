@@ -15,5 +15,4 @@ usuarioRouter.get('/dni/:dni', usuarioController.buscarPorDni); // Obtener usuar
 usuarioRouter.put('/:dni', usuarioController.actualizar); // Actualizar usuario
 usuarioRouter.delete('/:dni', usuarioController.eliminar); // Eliminar usuario
 
-
 module.exports = usuarioRouter;

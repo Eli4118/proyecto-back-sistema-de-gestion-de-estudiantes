@@ -1,12 +1,22 @@
-h1 Cursos y Materias
+extends index
 
-//- Verificar si hay cursos disponibles
-if cursos.length > 0
-  each curso in cursos
-    h2= `Curso: ${curso.grado} ${curso.nivel} - División: ${curso.division}`
-    ul
-      each materia in curso.materias
-        li= `Materia: ${materia.nombre}`
-else
-  h2= mensaje 
-  //- Mostrar mensaje si no hay cursos
+block content
+  h1.text-center.mt-4 Cursos, Materias, Alumnos y Notas
+
+  table.table.table-bordered.mt-4
+    thead
+      tr
+        th Curso
+        th Materia
+        th Alumno
+        th DNI
+        th Nota
+    tbody
+      each materia in materias
+        each estudiante in materia.curso.estudiantes
+          tr
+            td= materia.curso.grado + ' ' + materia.curso.division
+            td= materia.nombre
+            td= estudiante.nombres + ' ' + estudiante.apellidos
+            td= estudiante.dni
+            td= estudiante.nota  

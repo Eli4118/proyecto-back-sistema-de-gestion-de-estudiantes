@@ -89,27 +89,33 @@ async function obtenerCursosYMaterias(req, res) {
     const usuarioAutenticado = getUsuarioAutenticado(); 
     
     // Buscar las materias impartidas por el profesor
-    const materias = await Materia.find({ profesor: usuarioAutenticado._id }).select('curso').lean();
-
-    if (materias.length === 0) {
-        return res.render('profesores', { mensaje: 'El profesor no tiene materias asignadas.', cursos: [] });
-    }
-
-    const cursosIds = materias.map(m => m.curso);
-    const cursosUnicos = [...new Set(cursosIds)];
-
-    // Buscar los cursos con estudiantes
-    const cursosConAlumnos = await Curso.find({ _id: { $in: cursosUnicos } })
-        .populate('estudiantes', 'nombres apellidos')
-        .populate('materias', 'nombre')
-        .lean();
-
-    if (cursosConAlumnos.length === 0) {
-        return res.render('profesores', { mensaje: 'El profesor no tiene cursos asignados.', cursos: [] });
+    const materias = await Materia.find({ profesor: usuarioAutenticado._id })
+    .populate({
+      path: 'curso',
+      populate: {
+        path: 'estudiantes',
+        select: 'nombres apellidos dni'  // Seleccionas múltiples atributos
+      }
+    })
+    for (let materia of materias) {
+      for (let estudiante of materia.curso.estudiantes) {
+        // Buscamos las notas de cada estudiante en la materia actual
+        console.log(estudiante._id, materia._id);
+        const nota = await Nota.findOne({
+          estudiante: estudiante._id,
+          materia: materia._id
+        });
+        // Agregamos la nota al objeto del estudiante si existe
+        if (nota) {
+          estudiante.nota = nota.calificacion;
+        } else {
+          estudiante.nota = 'Sin nota';
+        }
+      }
     }
 
     // Renderizar los cursos con los estudiantes y materias
-    res.render('profesores', { cursos: cursosConAlumnos });
+    res.render('profesores', { materias });
   } catch (error) {
       console.error(error);
       res.status(500).send('Error al obtener los cursos y materias del profesor');
