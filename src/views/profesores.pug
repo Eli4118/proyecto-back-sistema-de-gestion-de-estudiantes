@@ -11,6 +11,7 @@ block content
         th Alumno
         th DNI
         th Nota
+        th Acción
     tbody
       each materia in materias
         each estudiante in materia.curso.estudiantes
@@ -20,3 +21,47 @@ block content
             td= estudiante.nombres + ' ' + estudiante.apellidos
             td= estudiante.dni
             td= estudiante.nota  
+            td
+              //- Formulario oculto para cargar la nota
+              form(action="/profesor" method="POST" onsubmit="return cargarNota(this);")
+                input(type="hidden" name="estudianteId" value=estudiante._id)
+                input(type="hidden" name="materiaId" value=materia._id)
+                .input-group
+                  input.form-control(type="number" name="calificacion" placeholder="Calificación" required min="0" max="10")
+                  select.form-control(name="tipoEvaluacion" required)
+                    option(value="Parcial") Parcial
+                    option(value="Final") Final
+                    option(value="Tarea") Tarea
+                    option(value="Examen") Examen
+                    option(value="Otro") Otro
+                  input.form-control(type="text" name="observaciones" placeholder="Observaciones")
+                  button.btn.btn-primary(type="submit") Cargar Nota
+
+    script.
+      function cargarNota(form) {
+        const formData = new FormData(form);
+        const data = {};
+        formData.forEach((value, key) => {
+          data[key] = value;
+        });
+
+        fetch(form.action, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Aquí puedes manejar la respuesta si es exitosa, como recargar la página o mostrar un mensaje
+            window.location.reload(); // Recargar la página para ver la nueva nota
+          } else {
+            alert(data.message); // Mostrar mensaje de error
+          }
+        })
+        .catch(error => console.error('Error:', error));
+        
+        return false; // Evitar el envío del formulario
+      }

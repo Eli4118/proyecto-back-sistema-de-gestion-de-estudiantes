@@ -48,7 +48,7 @@ async function verNotas(req, res) {
   }
 }
 
-// Función para que el profesor cargue la nota
+/* // Función para que el profesor cargue la nota
 const cargarNota = async (req, res) => {
   const { estudianteId, materiaId, calificacion, tipoEvaluacion, observaciones } = req.body;
   const usuarioAutenticado = getUsuarioAutenticado(); 
@@ -82,7 +82,7 @@ const cargarNota = async (req, res) => {
     res.status(500).send('Error al cargar la nota.');
   }
 };
-    
+    */ 
 
 async function obtenerCursosYMaterias(req, res) {
   try {
@@ -96,11 +96,30 @@ async function obtenerCursosYMaterias(req, res) {
         path: 'estudiantes',
         select: 'nombres apellidos dni'  // Seleccionas múltiples atributos
       }
-    })
+    }).lean()
+     const materiaId = materias[0]._id;//guardo el id de la materia 
+
+       // Extraer los IDs de los estudiantes del curso
+    const estudiantesIds = materias[0].curso.estudiantes.map(est => est._id);
+     // Hacer una sola co nsulta para obtener las notas de los estudiantes en esta materia
+     const notas = await Nota.find({
+      estudiante: { $in: estudiantesIds }, // Todos los estudiantes del curso
+      materia: materiaId // Solo la materia que dicta el profesor
+    }).lean();
+     
+    // Agregar calificaciones a los alumnos
+materias[0].curso.estudiantes.forEach(alumno => {
+  // Buscar la nota correspondiente al alumno
+  const nota = notas.find(n => n.estudiante.equals(alumno._id));
+  
+  // Si hay una nota, agregar la calificación; si no, asignar "no hay nota"
+  alumno.nota = nota ? nota.calificacion : "no hay nota";
+});
+   
+    /*  cambie el for porque no es eficiente
     for (let materia of materias) {
       for (let estudiante of materia.curso.estudiantes) {
         // Buscamos las notas de cada estudiante en la materia actual
-        console.log(estudiante._id, materia._id);
         const nota = await Nota.findOne({
           estudiante: estudiante._id,
           materia: materia._id
@@ -113,12 +132,43 @@ async function obtenerCursosYMaterias(req, res) {
         }
       }
     }
-
+  */
+   
     // Renderizar los cursos con los estudiantes y materias
     res.render('profesores', { materias });
   } catch (error) {
       console.error(error);
       res.status(500).send('Error al obtener los cursos y materias del profesor');
+  }
+}
+
+async function cargarNota(req, res) {
+  try {
+    const { estudianteId, materiaId, calificacion, tipoEvaluacion, observaciones } = req.body;
+
+    // Validar que la calificación esté en el rango permitido 
+    if (calificacion < 0 || calificacion > 10) {
+      return res.status(400).send('La calificación debe estar entre 0 y 10.');
+    }
+
+    // Crear una nueva nota
+    const nuevaNota = new Nota({
+      estudiante: estudianteId,
+      materia: materiaId,
+      profesor: getUsuarioAutenticado()._id, // Suponiendo que tienes un método para obtener el profesor autenticado
+      calificacion,
+      tipoEvaluacion,
+      observaciones
+    });
+
+    // Guardar la nota en la base de datos
+    await nuevaNota.save();
+ 
+     // Renderizar la vista con los datos actualizados
+     res.redirect('/profesor');// Cambia esto a la ruta correspondiente
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error al cargar la nota.');
   }
 }
 
