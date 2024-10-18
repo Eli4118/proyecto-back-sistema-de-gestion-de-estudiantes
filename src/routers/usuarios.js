@@ -16,4 +16,8 @@ usuarioRouter.get('/dni/:dni', usuarioController.buscarPorDni); // Obtener usuar
 usuarioRouter.put('/:dni', usuarioController.actualizar); // Actualizar usuario
 usuarioRouter.delete('/:dni', usuarioController.eliminar); // Eliminar usuario
 
+// Ruta para mostrar la vista de edición del usuario
+usuarioRouter.get('/:dni/editar', usuarioController.editar);
+
+
 module.exports = usuarioRouter;

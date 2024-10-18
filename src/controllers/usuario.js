@@ -165,8 +165,22 @@ const UsuarioController = {
     } catch (error) {
       res.status(500).json({ message: 'Error al eliminar el usuario', error: error.message });
     }
+  },
+  
+  editar:async (req, res) => {
+    try {
+      const usuario = await Usuario.findOne({ dni: req.params.dni });
+  
+      if (!usuario) {
+        return res.status(404).render('404', { message: 'Usuario no encontrado' });
+      }
+  
+      // Renderiza la vista de edición con los datos del usuario
+      res.render('editarUsuario', { usuario });
+    } catch (error) {
+      res.status(500).send('Error al cargar el formulario de edición');
+    }
   }
-    
 };
 
 

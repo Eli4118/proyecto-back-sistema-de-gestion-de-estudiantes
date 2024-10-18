@@ -48,42 +48,6 @@ async function verNotas(req, res) {
   }
 }
 
-/* // Función para que el profesor cargue la nota
-const cargarNota = async (req, res) => {
-  const { estudianteId, materiaId, calificacion, tipoEvaluacion, observaciones } = req.body;
-  const usuarioAutenticado = getUsuarioAutenticado(); 
-
-      // Extraer el ID del curso y el ID del estudiante/materia
-      const [cursoId, realEstudianteId] = estudianteId.split('-');
-      const [materiaCursoId, realMateriaId] = materiaId.split('-');
-  try {
-
-
-      // Verificar que el curso y la materia correspondan
-      if (cursoId !== materiaCursoId) {
-        return res.status(400).send('El curso seleccionado no coincide con la materia.');
-      }
-          // Crear una nueva nota
-    const nuevaNota = new Nota({
-      estudiante: realEstudianteId,
-      materia: realMateriaId,
-      profesor: usuarioAutenticado._id,
-      calificacion,
-      tipoEvaluacion,
-      observaciones
-    });
-  
-    // Guardar la nueva nota
-    await nuevaNota.save();
-
-    res.redirect('/profesor'); // Redirigir a la lista de estudiantes
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Error al cargar la nota.');
-  }
-};
-    */ 
-
 async function obtenerCursosYMaterias(req, res) {
   try {
     const usuarioAutenticado = getUsuarioAutenticado(); 
