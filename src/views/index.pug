@@ -19,7 +19,7 @@ html
         .collapse.navbar-collapse(id='navbarNav')
           ul.navbar-nav
             li.nav-item
-              a.nav-link.active(aria-current='page', href='#') Home
+              a.nav-link.active(aria-current='page', href='/') Home
             li.nav-item
               a.nav-link(href='usuarios') Listar 
             li.nav-item
@@ -28,6 +28,8 @@ html
               a.nav-link(href='profesor') Gestión 
             li.nav-item
               a.nav-link(href='notas') Notas 
+            li.nav-item
+              a.nav-link(href='usuarios/tutor') Tutor 
                     
             //- Si el usuario está autenticado, mostrar el link de Logout
             if usuarioAutenticado
