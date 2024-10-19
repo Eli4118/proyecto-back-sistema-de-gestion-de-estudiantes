@@ -44,18 +44,24 @@ const UsuarioSchema = new mongoose.Schema({
     unique: true,
   },
 
-  curso: {
+  grado: {
     type: String,
     // Puedes hacer que sea requerido solo si el rol es 'estudiante'
     required: function() {
       return this.rol === 'estudiante'; // Solo requerido si el rol es estudiante
     }
+  
   },
   turno: { 
     type: String, 
     required: function() {
       return this.rol === 'estudiante'; // Solo requerido si el rol es estudiante
     }
+  },
+  nivel: {
+    type: String,
+    required: true,
+    enum: ['primaria', 'secundaria'] // Define si el curso es de primaria o secundaria
   },
 
   // DNI de los tutores (para estudiantes) 
@@ -81,11 +87,11 @@ const UsuarioSchema = new mongoose.Schema({
     default: [] // Array vacío si no hay estudiantes a cargo
   }],
 
-  // Campos específicos para "estudiantes"
-  dniTutor: { // DNI del tutor para facilitar la búsqueda
-    type: Number,
-    // Esto puede ser opcional, puedes decidir si es obligatorio o no
-  },
+  cursoAsignado: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Curso' 
+  }
+  
   
 });
 
