@@ -20,15 +20,19 @@ html
           ul.navbar-nav
             li.nav-item
               a.nav-link.active(aria-current='page', href='/') Home
-            li.nav-item
-              a.nav-link(href='usuarios') Listar 
-            li.nav-item
-              a.nav-link(href='registro') Registrar 
-            li.nav-item
+            if usuarioAutenticado && usuarioAutenticado.rol === 'administrativo'   
+             li.nav-item
+              a.nav-link(href='usuarios') Listar
+             li.nav-item
+              a.nav-link(href='registro') Registrar
+            if usuarioAutenticado && usuarioAutenticado.rol === 'profesor'   
+             li.nav-item
               a.nav-link(href='profesor') Gestión 
-            li.nav-item
-              a.nav-link(href='notas') Notas 
-            li.nav-item
+            if usuarioAutenticado && usuarioAutenticado.rol === 'estudiante'
+             li.nav-item
+              a.nav-link(href='/notas') Notas  
+            if usuarioAutenticado && usuarioAutenticado.rol === 'tutor'
+             li.nav-item
               a.nav-link(href='usuarios/tutor') Tutor 
                     
             //- Si el usuario está autenticado, mostrar el link de Logout

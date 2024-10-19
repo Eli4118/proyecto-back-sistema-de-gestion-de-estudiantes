@@ -23,7 +23,7 @@ router.use('/usuarios', usuariosRouter);
 
 router.use('/login', sesionRouter);
 
-router.get('/notas',verNotas);
+router.get('/notas',verificarRol(['estudiante']),verNotas);
 
 //este es el router para que muestre un 404 con cualquier ruta no definida
 router.use((req, res, next) => {

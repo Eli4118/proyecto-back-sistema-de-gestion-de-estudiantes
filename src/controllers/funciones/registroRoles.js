@@ -41,11 +41,6 @@ async function registrarEstudiante(usuarioData) {
   // Devolver el nuevo estudiante
   return nuevoEstudiante; // Asegura que la función devuelva el estudiante creado
 }
-
-
-
-
-
 // Función para registrar tutores
 async function registrarTutor(usuarioData) {
   const { dniEstudiantes } = usuarioData;

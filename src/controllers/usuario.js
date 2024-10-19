@@ -32,7 +32,7 @@ const UsuarioController = {
     }
   },
 
-  listar: async (req, res) => {
+  listar2: async (req, res) => {
     try {
       const usuarios = await Usuario.find();
       //res.status(200).json(usuarios);
