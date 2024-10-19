@@ -17,6 +17,7 @@ router.get('/registroTutor', (req, res) => {
   res.render('formularioTutor'); // Renderiza formularioTutor.pug
 });
 
+
 router.use('/profesor', profesorRouter)
 // Usa estudianteRouter bajo la ruta '/usuarios'
 router.use('/usuarios', usuariosRouter);

@@ -4,72 +4,82 @@ const Usuario = require('../../models/usuarios');
 const Curso = require('../../models/cursos'); 
 
 async function registrarEstudiante(usuarioData) {
-  const { dniTutores, grado, nivel } = usuarioData;
+  const session = await mongoose.startSession();
+  session.startTransaction(); // Iniciar la transacción
+  try {
+    const { dniTutores, grado, nivel, turno } = usuarioData; // Agregar turno
 
-  // Crear el nuevo estudiante
-  const nuevoEstudiante = new Usuario({
-    ...usuarioData,
-    rol: 'estudiante',
-  });
-
-  // Buscar los tutores por DNI y asignar sus IDs al estudiante
-  if (dniTutores && dniTutores.length > 0) {
-    const tutores = await Usuario.find({ dni: { $in: dniTutores }, rol: 'tutor' });
-    if (tutores.length > 0) {
-      nuevoEstudiante.tutores = tutores.map(tutor => tutor._id);
-    } else {
-      console.log('No se encontraron tutores con esos DNIs');
-    }
-  }
-
-  // Guardar el estudiante
-  await nuevoEstudiante.save();
-  console.log('Estudiante guardado:', nuevoEstudiante);
-
-  // Buscar un curso existente con el mismo grado y nivel
-  let cursoExistente = await Curso.findOne({ grado, nivel });
-
-  if (cursoExistente) {
-    console.log('Curso encontrado:', cursoExistente);
-  } else {
-    console.log('No se encontró curso para grado:', grado, 'y nivel:', nivel);
-  }
-
-  // Verificar si el curso existe y tiene menos de 30 estudiantes
-  if (cursoExistente && cursoExistente.estudiantes.length < 30) {
-    // Agregar al estudiante al curso existente
-    cursoExistente.estudiantes.push(nuevoEstudiante._id);
-    await cursoExistente.save();
-    console.log('Estudiante agregado al curso existente');
-  } else {
-    // Si el curso no existe o está lleno, crear un nuevo curso
-    console.log('Creando un nuevo curso para grado:', grado, 'y nivel:', nivel);
-
-    const cantidadCursos = await Curso.countDocuments({ grado, nivel });
-    const nuevaDivision = String.fromCharCode(65 + cantidadCursos); // Generar nueva división (A, B, C, ...)
-
-    const nuevoCurso = new Curso({
-      grado,
-      nivel,
-      division: nuevaDivision,
-      estudiantes: [nuevoEstudiante._id], // Agregar al estudiante al nuevo curso
+    // Crear el nuevo estudiante
+    const nuevoEstudiante = new Usuario({
+      ...usuarioData,
+      rol: 'estudiante',
     });
 
-    await nuevoCurso.save();
-    console.log('Nuevo curso creado:', nuevoCurso);
-  }
+    // Buscar los tutores por DNI y asignar sus IDs al estudiante
+    if (dniTutores && dniTutores.length > 0) {
+      const tutores = await Usuario.find({ dni: { $in: dniTutores }, rol: 'tutor' }).session(session);
+      if (tutores.length > 0) {
+        nuevoEstudiante.tutores = tutores.map(tutor => tutor._id);
+      } else {
+        throw new Error('No se encontraron tutores con esos DNIs');
+      }
+    }
 
-  // Actualizar los tutores para agregar al nuevo estudiante
-  if (nuevoEstudiante.tutores && nuevoEstudiante.tutores.length > 0) {
-    await Usuario.updateMany(
-      { _id: { $in: nuevoEstudiante.tutores } },
-      { $addToSet: { estudiantes: nuevoEstudiante._id } }
-    );
-    console.log('Tutores actualizados con el nuevo estudiante');
-  }
+    // Guardar el estudiante
+    await nuevoEstudiante.save({ session });
 
-  return nuevoEstudiante;
+    // Buscar un curso existente con el mismo grado, nivel y turno
+    let cursoExistente = await Curso.findOne({ grado, nivel, turno }).session(session);
+
+    if (cursoExistente && cursoExistente.estudiantes.length < 30) {
+      // Agregar al estudiante al curso existente
+      cursoExistente.estudiantes.push(nuevoEstudiante._id);
+      await cursoExistente.save({ session });
+      nuevoEstudiante.cursoAsignado = cursoExistente._id; // Asignar el curso al estudiante
+    } else {
+      // Si el curso no existe o está lleno, crear un nuevo curso
+      const cantidadCursos = await Curso.countDocuments({ grado, nivel, turno }).session(session);
+      const nuevaDivision = String.fromCharCode(65 + cantidadCursos); // Generar nueva división (A, B, C, ...)
+
+      const nuevoCurso = new Curso({
+        grado,
+        nivel,
+        division: nuevaDivision,
+        turno, // Agregar turno al nuevo curso
+        estudiantes: [nuevoEstudiante._id], // Agregar al estudiante al nuevo curso
+      });
+
+      await nuevoCurso.save({ session });
+      nuevoEstudiante.cursoAsignado = nuevoCurso._id; // Asignar el curso al estudiante
+    }
+
+    // Actualizar los tutores para agregar al nuevo estudiante
+    if (nuevoEstudiante.tutores && nuevoEstudiante.tutores.length > 0) {
+      await Usuario.updateMany(
+        { _id: { $in: nuevoEstudiante.tutores } },
+        { $addToSet: { estudiantes: nuevoEstudiante._id } },
+        { session }
+      );
+    }
+
+    // Guardar los cambios en el estudiante (incluyendo el curso asignado)
+    await nuevoEstudiante.save({ session });
+
+    // Si todo va bien, confirmamos la transacción
+    await session.commitTransaction();
+    session.endSession();
+    return nuevoEstudiante;
+
+  } catch (error) {
+    // Si ocurre algún error, revertimos todas las operaciones
+    await session.abortTransaction();
+    session.endSession();
+    console.error('Error al registrar estudiante:', error);
+    return { success: false, message: error.message }; // Devuelve un mensaje claro
+  }
 }
+
+
 // Función para registrar tutores
 async function registrarTutor(usuarioData) {
   const { dniEstudiantes } = usuarioData;

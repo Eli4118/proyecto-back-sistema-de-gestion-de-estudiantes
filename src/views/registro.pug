@@ -4,16 +4,6 @@ block content
   .container.mt-5
     h1.text-center Registro de Usuario
 
-    //- Mensaje de éxito
-    if successMessage
-      .alert.alert-success
-        | #{successMessage}
-    
-    //- Mensaje de error
-    if errorMessage
-      .alert.alert-danger
-        | #{errorMessage}
-
     // Formulario con clases de Bootstrap
     form(action="/usuarios" method="POST" class="needs-validation" novalidate onsubmit="return validateForm(this);")
       .form-group
@@ -35,21 +25,21 @@ block content
 
       .form-group
         label(for="edad") Edad:
-        input.form-control(type="number" name="edad" placeholder="25")
+        input.form-control(type="number" name="edad" placeholder="25" min="1" max="100")
 
       .form-group
         label(for="correo") Correo Electrónico:
-        input.form-control(type="email" name="correo" placeholder="example@email.com")
+        input.form-control(type="email" name="correo" placeholder="example@email.com" required)
 
       .form-group
         label(for="dni") DNI:
-        input.form-control(type="number" name="dni" placeholder="12345678")
+        input.form-control(type="number" name="dni" placeholder="12345678" required min="0")
 
       // Sección de datos del estudiante, oculta por defecto
       .additional-fields(id="estudianteFields" style="display:none")
         .form-group
-          label(for="curso") Grado:
-          select.form-control(name="grado" id="grado" required onchange="toggleAdditionalFields();" )
+          label(for="grado") Grado:
+          select.form-control(name="grado" id="grado" required)
             option(value="" disabled selected) Selecciona un Grado 
             option(value="1") 1°
             option(value="2") 2°
@@ -60,32 +50,28 @@ block content
         
         .form-group
           label(for="turno") Turno:
-          select.form-control(name="turno" id="turno" required onchange="toggleAdditionalFields();" )
+          select.form-control(name="turno" id="turno" required)
             option(value="" disabled selected) Selecciona un Turno
             option(value="maniana") Mañana
             option(value="tarde") Tarde
 
         .form-group
           label(for="nivel") Nivel:
-          select.form-control(name="nivel" id="nivel" required onchange="toggleAdditionalFields();" )
+          select.form-control(name="nivel" id="nivel" required)
             option(value="" disabled selected) Selecciona un Nivel
             option(value="primaria") Primaria
             option(value="secundaria") Secundaria
 
         .form-group
           label(for="dniTutor") DNI del Tutor:
-          input.form-control(type="number" name="dniTutor" required placeholder="DNI del Tutor")
+          input.form-control(type="number" name="dniTutor" required placeholder="DNI del Tutor" min="0")
 
-        //include registroTutor.pug
       // Sección de datos del tutor, oculta por defecto
       .additional-fields(id="tutorFields" style="display:none")
-        // Aquí incluirías el formulario del tutor si es necesario
-
         .form-group
-          label(for="dniEstudinte") DNI del Tutor:
-          input.form-control(type="number" name="dniEstudinte" required placeholder="DNI del Estudiante")
+          label(for="dniEstudiante") DNI del Estudiante:
+          input.form-control(type="number" name="dniEstudiante" required placeholder="DNI del Estudiante" min="0")
 
-        
       // Botón submit
       button.btn.btn-primary(type="submit" id="submitBtn") Registrar
 
@@ -107,11 +93,36 @@ block content
         }       
       }    
 
-    // Script para hacer desaparecer el mensaje después de 3 segundos
+    // Script para manejar el envío del formulario
     script.
-      setTimeout(function() {
-        var alert = document.querySelector('.alert');
-        if (alert) {
-          alert.style.display = 'none';
+      document.querySelector('form').addEventListener('submit', async function(event) {
+        event.preventDefault(); // Previene el envío tradicional del formulario
+
+        const formData = new FormData(this); // Crea un objeto FormData con los datos del formulario
+        const datos = Object.fromEntries(formData); // Convierte FormData a un objeto
+
+        try {
+          const response = await fetch(this.action, {
+            method: 'POST', // Asegúrate de que sea POST
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(datos), // Convierte el objeto a JSON
+          });
+
+          const result = await response.json(); // Espera la respuesta y la convierte a JSON
+
+          // Manejo de respuestas
+          if (response.ok) {
+            // Si la respuesta es exitosa, muestra el mensaje
+            alert(result.message); // Muestra el mensaje de éxito
+            this.reset(); // Limpia el formulario después de un registro exitoso
+          } else {
+            // Muestra el mensaje de error
+            alert(result.message);
+          }
+        } catch (error) {
+          console.error('Error al registrar el usuario:', error);
+          alert('Error al registrar el usuario'); // Mensaje de error genérico
         }
-      }, 3000)  // 3000 milisegundos = 3 segundos
+      });

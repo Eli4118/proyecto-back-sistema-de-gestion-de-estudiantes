@@ -6,9 +6,10 @@ const UsuarioController = {
   registro: async (req, res) => {
     try {
       const { rol, ...usuarioData } = req.body;
-
+  
       let nuevoUsuario;
-
+  
+      // Se maneja el rol para registrar el usuario correcto
       switch (rol) {
         case 'estudiante':
           nuevoUsuario = await registrarEstudiante(usuarioData);
@@ -23,15 +24,19 @@ const UsuarioController = {
           nuevoUsuario = await registrarAdministrador(usuarioData);
           break;
         default:
-          return res.status(400).json({ message: 'Rol no válido' });
+          // Mensaje de rol no válido enviado al front-end
+          return res.status(400).json({ message:("Rol no válido")});
       }
-
-      return res.status(201).json({ message: 'Usuario registrado exitosamente', usuario: nuevoUsuario });
+  
+      // Mensaje de éxito enviado al front-end
+      return res.status(201).json({ message:("Usuario registrado exitosamente")});
     } catch (error) {
-      console.error('Error al registrar usuario:', error);
-      return res.status(400).json({ message: 'Error al registrar usuario', error: error.message });
+  
+      // Mensaje de error  enviado al front-end
+      return res.status(400).json({ message:("Error al registrar usuario: ${error.message}")});
     }
   },
+  
 
   listar: async (req, res) => {
     try {
@@ -172,18 +177,53 @@ const UsuarioController = {
   },
 
 
-  listarPorRol: async (req, res) => {
-    const { rol } = req.params; // Suponiendo que el rol viene como parámetro en la URL
+  filtrarEstudiantes: async (req, res) => {
     try {
-      const usuarios = await Usuario.find({ rol }); // Filtra usuarios por rol
-      if (usuarios.length === 0) {
-        return res.status(404).json({ message: 'No se encontraron usuarios con ese rol' });
+      const { grado, nivel, division, turno } = req.query;
+  
+      // Crear un objeto de filtros
+      const filtros = {};
+      
+      // Filtro para el curso asignado
+      if (grado || nivel || division) {
+        const cursoFiltro = {};
+        if (grado) cursoFiltro.grado = grado;
+        if (nivel) cursoFiltro.nivel = nivel;
+        if (division) cursoFiltro.division = division;
+  
+        // Buscar cursos que coincidan con el filtro
+        const cursos = await Curso.find(cursoFiltro).select('_id');
+        const cursoIds = cursos.map(curso => curso._id);
+  
+        // Agregar filtro para cursoAsignado en el filtro de estudiantes
+        filtros.cursoAsignado = { $in: cursoIds };
       }
-      res.status(200).json(usuarios);
+  
+      // Agregar el filtro para turno si es necesario
+      if (turno) filtros.turno = turno; // Asegúrate de que 'turno' está en el esquema de Usuario o Curso
+  
+      const estudiantes = await Usuario.find({ rol: 'estudiante', ...filtros })
+        .populate('cursoAsignado'); // Asegúrate de que 'cursoAsignado' está siendo populado
+  
+      const cursos = await Curso.find({}).select('grado nivel division');
+      const grados = [...new Set(cursos.map(curso => curso.grado))];
+      const niveles = [...new Set(cursos.map(curso => curso.nivel))];
+      const divisiones = [...new Set(cursos.map(curso => curso.division))];
+  
+      res.render('cursos', {
+        estudiantes,
+        grados,
+        niveles,
+        divisiones
+      });
     } catch (error) {
-      res.status(500).json({ message: 'Error al obtener los usuarios', error: error.message });
+      console.error('Error al filtrar estudiantes:', error);
+      return res.status(500).json({ message: 'Error al filtrar estudiantes' });
     }
   },
+  
+  
+  
 
   actualizar: async (req, res) => {
     try {
