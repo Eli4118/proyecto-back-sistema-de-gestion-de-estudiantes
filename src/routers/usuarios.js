@@ -1,6 +1,7 @@
 const express = require('express');
 const verificarRol = require('../middleware/verificarRol')//para protejer la ruta
 const usuarioController = require('../controllers/usuario');
+const {obtEstudianteTutor, verNotas1} = require('../controllers/historiaAcademica')
 const usuarioRouter = express.Router();
 // Define la ruta base '/estudiantes' y el contenido que va a devolver
 /* usuarioRouter.get('/', (request, response) => {
@@ -8,6 +9,8 @@ const usuarioRouter = express.Router();
   });
 // Rutas para usuarios */
 
+usuarioRouter.get('/tutor', obtEstudianteTutor);
+usuarioRouter.get('/tutor/:dni', verNotas1); 
 usuarioRouter.post('/', usuarioController.registro); // Crear usuario
 //usuarioRouter.get('/',verificarRol(['estudiante','profesor','tutor','administrativo']),usuarioController.listar); // Listar usuarios
 usuarioRouter.get('/',usuarioController.listar); // Listar usuarios

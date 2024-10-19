@@ -16,3 +16,5 @@ block content
                 | Profesor: #{nota.profesor.nombres} #{nota.profesor.apellidos}
               small.text-muted
                 | Fecha: #{new Date(nota.fecha).toLocaleDateString()}
+    .text-center.mt-4
+      button.btn.btn-secondary(type="button", onclick="window.history.back()") Volver
