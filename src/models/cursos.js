@@ -19,6 +19,10 @@ const CursoSchema = new mongoose.Schema({
     required: true,
     match: [/^[a-zA-Z0-9]$/, 'La división debe ser una única letra (A-Z) o un número (0-9)'] // Valida una letra o número
   },
+  turno: { 
+    type: String, 
+    enum: ['maniana', 'tarde']
+  },
   materias: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Materia', // Cada curso puede tener varias materias
@@ -27,12 +31,12 @@ const CursoSchema = new mongoose.Schema({
   estudiantes: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Usuario', // Relaciona a los estudiantes que están inscritos en este curso//controlar hasta 30 por curso
-    validate: {
+   /* validate: {
       validator: function (v) {
         return v.length <= 30;
       },
       message: 'El curso no puede tener más de 30 estudiantes'
-    }
+    }*/
   }]
 });
 

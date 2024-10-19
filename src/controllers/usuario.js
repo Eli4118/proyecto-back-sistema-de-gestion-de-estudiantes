@@ -1,6 +1,7 @@
 const { model } = require("mongoose");
 const Usuario = require('../models/usuarios'); // Importa el esquema base
-const { registrarEstudiante, registrarTutor, registrarProfesor, registrarAdministrador } = require('./funciones/registroRoles');
+const Curso = require('../models/cursos'); 
+const { registrarEstudiante, registrarTutor, registrarProfesor, registrarAdministrador,asignarEstudiantesACurso } = require('./funciones/registroRoles');
 const UsuarioController = {
   registro: async (req, res) => {
     try {
@@ -32,7 +33,7 @@ const UsuarioController = {
     }
   },
 
-  listar2: async (req, res) => {
+ /* listar2: async (req, res) => {
     try {
       const usuarios = await Usuario.find();
       //res.status(200).json(usuarios);
@@ -41,8 +42,65 @@ const UsuarioController = {
     } catch (error) {
       res.status(500).json({ message: 'Error al listar los usuarios', error: error.message });
     }
-  },
+  },*/
 
+  listar: async (req, res) => {
+    try {
+      // Obtener los parámetros de los filtros
+      const { nivel, turno, grado, asignado } = req.query;
+      
+      // Crear el objeto de consulta para filtrar solo estudiantes
+      const query = { rol: 'estudiante' };
+  
+      // Aplicar los filtros desde la colección de Usuarios (Nivel, Turno, Grado)
+      if (nivel) {
+        query.nivel = nivel;
+      }
+  
+      if (turno) {
+        query.turno = turno;
+      }
+  
+      if (grado) {
+        query.grado = grado;
+      }
+  
+      // Obtener estudiantes que cumplen con los filtros aplicados
+      let estudiantes = await Usuario.find(query);
+      console.log('Estudiantes encontrados:', estudiantes); 
+  
+      // Filtrar por asignación si se especifica
+      if (asignado) {
+        const cursos = await Curso.find(); // Obtener todos los cursos
+        estudiantes = estudiantes.map(est => {
+          const estaAsignado = cursos.some(curso => curso.estudiantes.includes(est._id));
+          return {
+            ...est.toObject(),
+            asignado: estaAsignado
+          };
+        });
+  
+        // Filtrar por estudiantes asignados o no asignados
+        if (asignado === 'asignados') {
+          estudiantes = estudiantes.filter(est => est.asignado);
+        } else if (asignado === 'noAsignados') {
+          estudiantes = estudiantes.filter(est => !est.asignado);
+        }
+      }
+  
+      console.log('Estudiantes a renderizar:', estudiantes);
+  
+      // Renderizar la vista con los estudiantes filtrados
+      res.render('listar', { estudiantes });
+    } catch (error) {
+      console.error('Error al listar estudiantes:', error);
+      res.status(500).json({ message: 'Error al listar estudiantes' });
+    }
+  },
+  
+  
+  
+  
   /*buscarPorDni: async (req, res) => {
     try {
       const usuario = await Usuario.findOne({ dni: req.params.dni })
@@ -166,21 +224,34 @@ const UsuarioController = {
       res.status(500).json({ message: 'Error al eliminar el usuario', error: error.message });
     }
   },
-  
-  editar:async (req, res) => {
+  asignacionCurso: async (req, res) => {
     try {
-      const usuario = await Usuario.findOne({ dni: req.params.dni });
+      const { rol, ...datosAsignacion } = req.body;
   
-      if (!usuario) {
-        return res.status(404).render('404', { message: 'Usuario no encontrado' });
+      let resultado;
+  
+      switch (rol) {
+        case 'estudiante':
+          resultado = await asignarEstudiantesACurso(datosAsignacion);
+          break;
+  
+        case 'profesor':
+          resultado = await asignarProfesoresACurso(datosAsignacion); // En caso de implementar más adelante
+          break;
+  
+        default:
+          return res.status(400).json({ message: 'Rol no válido' });
       }
   
-      // Renderiza la vista de edición con los datos del usuario
-      res.render('editarUsuario', { usuario });
+      return res.status(201).json(resultado);
     } catch (error) {
-      res.status(500).send('Error al cargar el formulario de edición');
+      console.error('Error en la asignación de curso:', error);
+      return res.status(400).json({ message: 'Error en la asignación de curso', error: error.message });
     }
-  }
+  },
+  
+  
+    
 };
 
 
