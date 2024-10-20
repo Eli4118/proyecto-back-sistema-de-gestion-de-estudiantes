@@ -7,8 +7,8 @@ block content
         //- Título del formulario de inicio de sesión
         h3.text-center.mb-4 Login
         
-        //- Formulario de inicio de sesión que envía los datos con POST
-        form(action="/login" method="POST") 
+        //- Formulario de inicio de sesión
+        form#loginForm(action="/login" method="POST") 
           .mb-3
             label(for="correo") Email Address
             .input-group
@@ -29,7 +29,7 @@ block content
           button.btn.btn-primary.w-100(type="submit") Login
         
 
-  //- JavaScript para mostrar/ocultar contraseña
+  //- JavaScript para mostrar/ocultar contraseña y manejar errores de login
   script.
     const togglePassword = document.querySelector('#togglePassword');
     const passwordField = document.querySelector('#password');
@@ -43,4 +43,33 @@ block content
       // Cambiar el icono
       toggleIcon.classList.toggle('bi-eye');
       toggleIcon.classList.toggle('bi-eye-slash');
+    });
+
+    // Interceptar errores sin bloquear la redirección en caso de éxito
+    document.querySelector('#loginForm').addEventListener('submit', async function (e) {
+      e.preventDefault(); // Prevenir envío por defecto del formulario
+
+      const formData = new FormData(this);
+      const loginData = Object.fromEntries(formData);
+
+      try {
+        const response = await fetch(this.action, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(loginData)
+        });
+
+        if (!response.ok) {
+          // Si la respuesta no es 200 OK, asumir que es un error
+          const result = await response.json();
+          alert(result.mensaje || 'Error desconocido');
+        } else {
+          // Si es un éxito, permitir que la redirección del backend ocurra normalmente
+          window.location.href = response.url;
+        }
+      } catch (error) {
+        alert('Error de conexión. Intenta nuevamente.');
+      }
     });
