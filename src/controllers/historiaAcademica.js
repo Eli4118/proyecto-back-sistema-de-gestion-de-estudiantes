@@ -85,8 +85,10 @@ async function verNotas(req, res) {
 
       // Verifica si hay estudiantes
       if (estudiantes.length === 0) {
-        return res.status(404).json({ mensaje: 'No tienes estudiantes a tu cargo.' });
-      }
+        return res.render('tutor', {
+          estudiantes: [],
+          errorMessage: 'No tienes estudiantes a tu cargo.'
+        });      }
 
       // Devuelve la lista de estudiantes
       res.render('tutor', { estudiantes });
@@ -110,6 +112,7 @@ async function verNotas(req, res) {
             select: 'nombres apellidos dni'  // Seleccionas múltiples atributos
           }
         }).lean()
+        console.log(materias)
       const materiaId = materias[0]._id;//guardo el id de la materia 
 
       // Extraer los IDs de los estudiantes del curso
