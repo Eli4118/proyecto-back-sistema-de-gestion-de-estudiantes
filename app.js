@@ -15,9 +15,6 @@ conectarDB();
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'src/views')); // Carpeta donde estarán las vistas Pug
 
-
-
-
 // Middleware para manejar JSON y formularios
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
