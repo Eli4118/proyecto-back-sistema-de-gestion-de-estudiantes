@@ -3,25 +3,30 @@ const verificarRol = require('../middleware/verificarRol')//para protejer la rut
 const usuarioController = require('../controllers/usuario');
 const {obtEstudianteTutor, verNotas1} = require('../controllers/historiaAcademica')
 const usuarioRouter = express.Router();
-// Define la ruta base '/estudiantes' y el contenido que va a devolver
-/* usuarioRouter.get('/', (request, response) => {
-    response.send('Hola  Usuarios');
-  });
-// Rutas para usuarios */
+//hacer un enrutador para tutor 
 
-usuarioRouter.get('/tutor', obtEstudianteTutor);
-usuarioRouter.get('/tutor/:dni', verNotas1); 
-usuarioRouter.post('/', usuarioController.registro); // Crear usuario
-//usuarioRouter.get('/',verificarRol(['estudiante','profesor','tutor','administrativo']),usuarioController.listar); // Listar usuarios
-usuarioRouter.get('/',usuarioController.listar); // Listar usuarios
-usuarioRouter.get('/cursos',usuarioController.filtrarEstudiantes);
-//usuarioRouter.get('/:rol',usuarioController.listarPorRol); // Listar usuarios por rol
-usuarioRouter.get('/dni/:dni', usuarioController.buscarPorDni); // Obtener usuario por dni
-usuarioRouter.put('/:dni', usuarioController.actualizar); // Actualizar usuario
-usuarioRouter.delete('/:dni', usuarioController.eliminar); // Eliminar usuario
+//rutas para tutor 
+//visualiza los estudiantes relacionados con el tutor
+usuarioRouter.get('/tutor',verificarRol(['tutor']), obtEstudianteTutor);
+//visualiza las notas de un estudiantes relacionados con el tutor
+usuarioRouter.get('/tutor/:dni',verificarRol(['tutor']), verNotas1); 
 
-// Ruta para mostrar la vista de edición del usuario
-usuarioRouter.get('/:dni/editar', usuarioController.editar);
+//rutas para usuarios
+// Crear usuario
+usuarioRouter.post('/',verificarRol(['administrativo']), usuarioController.registro); 
+// Listar todos los usuarios
+usuarioRouter.get('/',verificarRol(['administrativo']),usuarioController.listar);
+// Listar todos los estudiantes
+usuarioRouter.get('/cursos',verificarRol(['administrativo']),usuarioController.filtrarEstudiantes);
+// Actualizar usuario
+usuarioRouter.put('/:dni',verificarRol(['administrativo']),usuarioController.actualizar);
+// visualiza la pagina de Actualizar usuario
+usuarioRouter.get('/:dni/editar', verificarRol(['administrativo']),usuarioController.editar);
+// Eliminar usuario 
+usuarioRouter.delete('/:dni',verificarRol(['administrativo']), usuarioController.eliminar); 
 
+//funciones que no se utilizan por el momento
+// Obtener usuario por dni
+//usuarioRouter.get('/dni/:dni', usuarioController.buscarPorDni);
 
 module.exports = usuarioRouter;

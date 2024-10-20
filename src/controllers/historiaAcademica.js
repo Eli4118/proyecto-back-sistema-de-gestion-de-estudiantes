@@ -129,24 +129,6 @@ async function verNotas(req, res) {
         alumno.nota = nota ? nota.calificacion : "no hay nota";
       });
 
-      /*  cambie el for porque no es eficiente
-      for (let materia of materias) {
-        for (let estudiante of materia.curso.estudiantes) {
-          // Buscamos las notas de cada estudiante en la materia actual
-          const nota = await Nota.findOne({
-            estudiante: estudiante._id,
-            materia: materia._id
-          });
-          // Agregamos la nota al objeto del estudiante si existe
-          if (nota) {
-            estudiante.nota = nota.calificacion;
-          } else {
-            estudiante.nota = 'Sin nota';
-          }
-        }
-      }
-    */
-
       // Renderizar los cursos con los estudiantes y materias
       res.render('profesores', { materias });
     } catch (error) {
