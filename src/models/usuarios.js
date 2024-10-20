@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const UsuarioSchema = new mongoose.Schema({
   rol: { 
     type: String, 
-    enum: ['estudiante', 'tutor', 'profesor', 'administrador'], 
+    enum: ['estudiante', 'tutor', 'profesor', 'administrativo'], 
     required: true 
   },
   nombres: {
@@ -60,7 +60,9 @@ const UsuarioSchema = new mongoose.Schema({
   },
   nivel: {
     type: String,
-    required: true,
+    required: function() {
+      return this.rol === 'estudiante'; // Solo requerido si el rol es estudiante
+    },
     enum: ['primaria', 'secundaria'] // Define si el curso es de primaria o secundaria
   },
 

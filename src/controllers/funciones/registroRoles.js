@@ -126,7 +126,7 @@ async function registrarProfesor(usuarioData) {
 async function registrarAdministrador(usuarioData) {
   const nuevoAdministrador = new Usuario({
     ...usuarioData,
-    rol: 'administrador',
+    rol: 'administrativo',
   });
   
   await nuevoAdministrador.save();

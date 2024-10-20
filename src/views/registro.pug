@@ -4,8 +4,7 @@ block content
   .container.mt-5
     h1.text-center Registro de Usuario
 
-    // Formulario con clases de Bootstrap
-    form(action="/usuarios" method="POST" class="needs-validation" novalidate onsubmit="return validateForm(this);")
+    form(action="/usuarios" method="POST" class="needs-validation" onsubmit="return manejarRegistroUsuario(this);")
       .form-group
         label(for="rol") Rol:
         select.form-control(name="rol" id="rol" required onchange="toggleAdditionalFields();")
@@ -35,11 +34,10 @@ block content
         label(for="dni") DNI:
         input.form-control(type="number" name="dni" placeholder="12345678" required min="0")
 
-      // Sección de datos del estudiante, oculta por defecto
       .additional-fields(id="estudianteFields" style="display:none")
         .form-group
           label(for="grado") Grado:
-          select.form-control(name="grado" id="grado" required)
+          select.form-control(name="grado" id="grado")
             option(value="" disabled selected) Selecciona un Grado 
             option(value="1") 1°
             option(value="2") 2°
@@ -50,27 +48,26 @@ block content
         
         .form-group
           label(for="turno") Turno:
-          select.form-control(name="turno" id="turno" required)
+          select.form-control(name="turno" id="turno")
             option(value="" disabled selected) Selecciona un Turno
             option(value="maniana") Mañana
             option(value="tarde") Tarde
 
         .form-group
           label(for="nivel") Nivel:
-          select.form-control(name="nivel" id="nivel" required)
+          select.form-control(name="nivel" id="nivel")
             option(value="" disabled selected) Selecciona un Nivel
             option(value="primaria") Primaria
             option(value="secundaria") Secundaria
 
         .form-group
           label(for="dniTutor") DNI del Tutor:
-          input.form-control(type="number" name="dniTutor" required placeholder="DNI del Tutor" min="0")
+          input.form-control(type="number" name="dniTutor" id="dniTutor" placeholder="DNI del Tutor" min="0")
 
-      // Sección de datos del tutor, oculta por defecto
       .additional-fields(id="tutorFields" style="display:none")
         .form-group
           label(for="dniEstudiante") DNI del Estudiante:
-          input.form-control(type="number" name="dniEstudiante" required placeholder="DNI del Estudiante" min="0")
+          input.form-control(type="number" name="dniEstudiante" id="dniEstudiante" placeholder="DNI del Estudiante" min="0")
 
       // Botón submit
       button.btn.btn-primary(type="submit" id="submitBtn") Registrar
@@ -78,51 +75,64 @@ block content
     script.
       function toggleAdditionalFields() {
         var rol = document.getElementById("rol").value;
-        var parentFields = document.getElementById("estudianteFields");
+        var studentFields = document.getElementById("estudianteFields");
         var tutorFields = document.getElementById("tutorFields");
+
         if (rol === "estudiante") {
-          parentFields.style.display = "block";
-        } else {
-          parentFields.style.display = "none";
-        }
-
-        if (rol === "tutor") {
-          tutorFields.style.display = "block";
-        } else {
+          studentFields.style.display = "block";
           tutorFields.style.display = "none";
-        }       
-      }    
-
-    // Script para manejar el envío del formulario
-    script.
-      document.querySelector('form').addEventListener('submit', async function(event) {
-        event.preventDefault(); // Previene el envío tradicional del formulario
-
-        const formData = new FormData(this); // Crea un objeto FormData con los datos del formulario
-        const datos = Object.fromEntries(formData); // Convierte FormData a un objeto
-
-        try {
-          const response = await fetch(this.action, {
-            method: 'POST', // Asegúrate de que sea POST
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(datos), // Convierte el objeto a JSON
-          });
-
-          const result = await response.json(); // Espera la respuesta y la convierte a JSON
-
-          // Manejo de respuestas
-          if (response.ok) {
-            // Si la respuesta es exitosa, muestra el mensaje
-            alert(result.message); // Muestra el mensaje de éxito
-            this.reset(); // Limpia el formulario después de un registro exitoso
-          } else {
-            // Muestra el mensaje de error
-            alert(result.message);
-          }
-        } catch (error) {
-          console.error('Error al registrar el usuario:', error);
-          alert('Error al registrar el usuario'); // Mensaje de error genérico
+          toggleRequiredFields(studentFields, true);
+          toggleRequiredFields(tutorFields, false);
+        } else if (rol === "tutor") {
+          studentFields.style.display = "none";
+          tutorFields.style.display = "block";
+          toggleRequiredFields(studentFields, false);
+          toggleRequiredFields(tutorFields, true);
+        } else {
+          studentFields.style.display = "none";
+          tutorFields.style.display = "none";
+          toggleRequiredFields(studentFields, false);
+          toggleRequiredFields(tutorFields, false);
         }
-      });
+      }
+
+      function toggleRequiredFields(container, isRequired) {
+        const inputs = container.querySelectorAll('input, select');
+        inputs.forEach(input => {
+          if (isRequired) {
+            input.setAttribute('required', 'required');
+          } else {
+            input.removeAttribute('required');
+          }
+        });
+      }
+
+    script.
+      function manejarRegistroUsuario(form) {
+        const formData = new FormData(form);
+        const data = {};
+        formData.forEach((value, key) => {
+          data[key] = value;
+        });
+
+        fetch(form.action, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        })
+        .then(response => response.json())
+        .then(result => {
+          
+     
+            alert(result.message);
+            location.reload();
+        })
+        .catch(error => {
+          console.error('Error al registrar el usuario:', error);
+          alert('Error al registrar el usuario');
+        });
+
+        return false; // Prevenir el comportamiento predeterminado del formulario
+      }

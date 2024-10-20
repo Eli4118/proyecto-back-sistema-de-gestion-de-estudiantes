@@ -20,7 +20,7 @@ const UsuarioController = {
         case 'profesor':
           nuevoUsuario = await registrarProfesor(usuarioData);
           break;
-        case 'administrador':
+        case 'administrativo':
           nuevoUsuario = await registrarAdministrador(usuarioData);
           break;
         default:
@@ -31,7 +31,7 @@ const UsuarioController = {
       // Mensaje de éxito enviado al front-end
       return res.status(201).json({ message:("Usuario registrado exitosamente")});
     } catch (error) {
-  
+      //console.log(error);
       // Mensaje de error  enviado al front-end
       return res.status(400).json({ message:("Error al registrar usuario: ${error.message}")});
     }
