@@ -29,6 +29,7 @@ const UsuarioController = {
       }
   
       // Mensaje de éxito enviado al front-end
+      //controlar mensaje de error
       return res.status(201).json({ message:("Usuario registrado exitosamente")});
     } catch (error) {
       //console.log(error);
