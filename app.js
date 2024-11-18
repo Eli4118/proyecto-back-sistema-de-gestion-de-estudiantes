@@ -9,7 +9,7 @@ conectarDB();
 // Configurar Pug como motor de vistas
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'src/views')); // Carpeta donde estarán las vistas Pug
-
+app.use(express.static('public'));
 
 
 
