@@ -5,17 +5,12 @@ const Curso = require('../models/cursos');
 const { getUsuarioAutenticado } = require('../utils/session');
 
 async function nota(usuarioAutenticado) {
-
-
   try {
-
     // Verificar que el usuario está autenticado y tiene un ID válido
     if (!usuarioAutenticado || !usuarioAutenticado._id) {
       return res.status(401).send('Usuario no autenticado');
     }
-
     let estudianteId;
-
     // Si el usuario autenticado es un estudiante
     if (usuarioAutenticado.rol === 'estudiante') {
       estudianteId = usuarioAutenticado._id;
@@ -23,56 +18,46 @@ async function nota(usuarioAutenticado) {
     // Si el usuario autenticado es un tutor
     else if (usuarioAutenticado.rol === 'tutor') {
       const estudiante = await Usuario.findOne({ dniTutor: usuarioAutenticado.dni, rol: 'estudiante' });
-
       // Verificar si el tutor tiene un estudiante asociado
       if (!estudiante) {
         return res.status(404).send('No se encontraron estudiantes asociados a este tutor');
       }
-
       estudianteId = estudiante._id;
     } else {
       return res.status(403).send('No tienes permiso para ver las notas');
     }
-
     // Buscar las notas del estudiante
     const notas = await Nota.find({ estudiante: estudianteId })
       .populate('materia', 'nombre')  // Poblar el nombre de la materia
       .populate('profesor', 'nombres apellidos')  // Poblar el nombre del profesor
       .exec();
     return notas
-    // Renderizar la vista con las notas encontradas
-    //res.render('historiaAcademica', { notas });
-
   } catch (error) {
     console.error(error);
     res.status(500).send('Error al cargar las notas');
   }
 }
-
+//estudiante
 async function verNotas(req, res) {
-  const usuarioAutenticado = getUsuarioAutenticado(); // Obtener el usuario autenticado
+  const usuarioAutenticado = getUsuarioAutenticado(); 
   try {
     const notas = await nota(usuarioAutenticado);
     res.render('historiaAcademica', { notas });
-
   } catch (error) {
     console.error(error);
     res.status(500).send('Error al cargar las notas');
   }
 }
+//tutor
   async function verNotas1(req, res) {
-
     try {
       const usuarioAutenticado = await Usuario.findOne({dni:req.params.dni })
-     
       const notas = await nota(usuarioAutenticado);
       res.render('historiaAcademica', { notas });
-
     } catch (error) {
       console.error(error);
       res.status(500).send('Error al cargar las notas');
     }
-
   }
 
   async function obtEstudianteTutor(req, res) {
