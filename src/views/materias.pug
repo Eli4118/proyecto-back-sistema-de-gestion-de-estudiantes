@@ -1,0 +1,39 @@
+extends index
+
+block content
+    .container.mt-5
+        h1.text-center.text-primary Lista de Materias
+
+        //- Mensaje de éxito o error
+        if mensaje
+            .alert.alert-success.text-center= mensaje
+        if error
+            .alert.alert-danger.text-center= error
+
+        //- Tabla de materias
+        table.table.table-striped.mt-4
+            thead
+                tr
+                    th Nombre
+                    th Nivel
+                    th Profesor
+                    th Curso
+                    th Día
+                    th Horario
+                    th Acción
+            tbody
+                each materia in materias
+                    tr
+                        td= materia.nombre
+                        td= materia.nivel
+                        td= materia.profesor ? materia.profesor.nombre : 'Sin asignar'
+                        td= materia.curso ? materia.curso.nombre : 'Sin asignar'
+                        td= materia.horario.dia
+                        td= materia.horario.horaInicio + ' - ' + materia.horario.horaFin
+                        td
+                            a.btn.btn-warning(href=`/materias/editar/${materia._id}`) Editar
+                            a.btn.btn-danger.ml-2(href=`/materias/eliminar/${materia._id}`) Eliminar
+
+        //- Enlace para agregar nueva materia
+        .text-center.mt-4
+            a.btn.btn-primary(href="/materias/nueva") Cargar Nueva Materia
