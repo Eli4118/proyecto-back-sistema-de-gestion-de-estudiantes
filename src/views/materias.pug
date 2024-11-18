@@ -16,16 +16,16 @@ block content
                 tr
                     th Nombre
                     th Nivel
-                    th Día
-                    th Horario
+                    th Grado
+                    th Division
                     th Acción
             tbody
                 each materia in materias
                     tr
                         td= materia.nombre
                         td= materia.nivel
-                        td= materia.horario.dia
-                        td= materia.horario.horaInicio + ' - ' + materia.horario.horaFin
+                        td= materia.grado
+                        td= materia.division
                         td
                             a.btn.btn-warning(href=`/usuarios/materias/editar/${materia._id}`) Editar
                             a.btn.btn-danger.ml-2(href=`/usuarios/materias/eliminar/${materia._id}`) Eliminar
