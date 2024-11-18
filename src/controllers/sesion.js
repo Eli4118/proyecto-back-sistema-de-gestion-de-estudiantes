@@ -4,7 +4,6 @@ const SesionController = {
 
     login:  async (req, res) => {
         const { correo, password } = req.body;
-
          try {
         // Buscar al usuario por correo
           const usuario = await Usuario.findOne({ correo });
@@ -24,13 +23,11 @@ const SesionController = {
         res.status(500).json({ mensaje: 'Error al iniciar sesión', error: error.message });
         }
     },
-
     // cierre de sesión
     logout: (req, res) => {
         setUsuarioAutenticado(null); 
        // res.json({ mensaje: 'Cierre de sesión exitoso' });
        res.redirect('/');
     },
-
 }
 module.exports = SesionController;

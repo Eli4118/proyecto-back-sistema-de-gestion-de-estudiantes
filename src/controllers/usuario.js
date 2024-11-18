@@ -94,7 +94,7 @@ const UsuarioController = {
           }
         }
 
-        console.log(usuario);
+        //console.log(usuario);
         return res.status(200).json(usuario);
       } else {
         return res.status(404).json({ message: 'Usuario no encontrado' });
