@@ -70,7 +70,7 @@ const MateriaController = {
         try {
             const materia = await Materia.findById(req.params.id)
                 .populate('profesor') // Trae solo el nombre del profesor
-                .populate('curso', 'nombre');  // Trae solo el nombre del curso
+                .populate('curso');  // Trae solo el nombre del curso
                 
             if (!materia) {
                 return res.status(404).send('Materia no encontrada');
@@ -109,26 +109,29 @@ const MateriaController = {
                 return res.status(404).render('error', { mensaje: 'Materia no encontrada para editar' });
             }
     
-            res.redirect('/materias');
+            // Redirige al listado de materias
+            res.json({ message: 'Materia editada con éxito' });  // En lugar de res.redirect, devolver una respuesta JSON.
         } catch (error) {
             console.error('Error al editar materia:', error);
             res.status(500).render('error', { mensaje: 'Error al editar materia' });
         }
     },
-
+    
     eliminarMateria: async (req, res) => {
         try {
-            const { id } = req.params;
-            const materiaEliminada = await Materia.findByIdAndDelete(id);
+            const materiaId = req.params.id;
+            console.log('ID recibido para eliminar:', materiaId);
+    
+            const materiaEliminada = await Materia.findByIdAndDelete(materiaId);
     
             if (!materiaEliminada) {
-                return res.status(404).render('error', { mensaje: 'Materia no encontrada para eliminar' });
+                return res.status(404).json({ message: 'Materia no encontrada' });
             }
     
-            res.redirect('/materias');
+            res.json({ message: 'Materia eliminada exitosamente' });
         } catch (error) {
-            console.error('Error al eliminar materia:', error);
-            res.status(500).render('error', { mensaje: 'Error al eliminar materia' });
+            console.error('Error al eliminar la materia:', error);
+            res.status(500).json({ message: 'Error al eliminar la materia' });
         }
     },
     

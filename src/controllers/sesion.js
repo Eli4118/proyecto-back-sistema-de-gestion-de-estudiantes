@@ -29,7 +29,7 @@ const SesionController = {
     logout: (req, res) => {
         setUsuarioAutenticado(null); 
        // res.json({ mensaje: 'Cierre de sesión exitoso' });
-       res.redirect('/home');
+       res.redirect('/');
     },
 
 }

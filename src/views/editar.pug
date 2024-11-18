@@ -3,13 +3,14 @@ extends index
 block content
     .container.mt-5
         h1.text-center.text-primary Editar Materia
-
-        //- Mensaje de error si existe
-        if error
-            .alert.alert-danger.text-center= error
+         // Mensaje de éxito o error
+        if successMessage
+            .alert.alert-success= successMessage
+        if errorMessage
+            .alert.alert-danger= errorMessage
 
         //- Formulario de edición
-        form(action=`/materias/editar/${materia._id}?_method=PUT` method="POST" class="mt-4")
+        form#updateUserForm(action=`/usuarios/materias/editar/${materia._id}?_method=PUT` method="POST" class="mt-4")
 
             .mb-3
                 label.form-label(for="nombre") Nombre de la Materia
@@ -24,7 +25,7 @@ block content
             //- Desplegable de profesores
             .mb-3
                 label.form-label(for="profesor") Profesor
-                select.form-select(name="profesor" id="profesor" required)
+                select.form-select(name="profesor" id="profesor" )
                     option(value="" disabled selected) Selecciona un profesor
                     each profesor in profesores
                         option(value=profesor._id selected=(materia.profesor && profesor._id.toString() === materia.profesor._id.toString()))= profesor.nombres
@@ -58,3 +59,34 @@ block content
 
             .text-center
                 button.btn.btn-primary(type="submit") Guardar Cambios
+
+        // Script para manejar el envío del formulario
+        script.
+            document.getElementById('updateUserForm').addEventListener('submit', async function(event) {
+                event.preventDefault(); // Previene el envío tradicional del formulario
+
+                const formData = new FormData(this); // Crea un objeto FormData con los datos del formulario
+                const datos = Object.fromEntries(formData); // Convierte FormData a un objeto
+
+                try {
+                    const response = await fetch(this.action, {
+                        method: 'PUT', // Cambia a 'PUT' si usas 'PUT' directamente en el formulario
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(datos), // Convierte el objeto a JSON
+                    });
+
+                    const result = await response.json(); // Espera la respuesta y la convierte a JSON
+
+                    if (response.ok) {
+                        alert(result.message); // Muestra el mensaje de éxito
+                        window.location.href = '/usuarios/materias'; // Redirige a la lista de materias
+                    } else {
+                        alert(result.message); // Muestra el mensaje de error
+                    }
+                } catch (error) {
+                    console.error('Error al actualizar el usuario:', error);
+                    alert('Error al actualizar el usuario');
+                }
+            });

@@ -32,9 +32,9 @@ usuarioRouter.post('/materias/nueva',verificarRol(['administrativo']),MateriaCon
 // Ruta para mostrar el formulario de edición
 usuarioRouter.get('/materias/editar/:id',verificarRol(['administrativo']),MateriaController.mostrarFormularioEdicion);
 // Ruta para procesar la edición
-usuarioRouter.put('/editar/:id',verificarRol(['administrativo']),MateriaController.editarMateria);
+usuarioRouter.put('/materias/editar/:id',verificarRol(['administrativo']),MateriaController.editarMateria);
 // Ruta para eliminar una materia
-usuarioRouter.delete('/eliminar/:id',verificarRol(['administrativo']), MateriaController.eliminarMateria); 
+usuarioRouter.delete('/materias/eliminar/:id',verificarRol(['administrativo']), MateriaController.eliminarMateria); 
 //funciones que no se utilizan por el momento
 // Obtener usuario por dni
 //usuarioRouter.get('/dni/:dni', usuarioController.buscarPorDni);
