@@ -27,5 +27,4 @@ router.get('/notas',verificarRol(['estudiante','tutor']),verNotas);
 router.use((req, res, next) => {
   return res.status(404).render('404', { title: 'Página no encontrada' });
 });
-
 module.exports = router;
