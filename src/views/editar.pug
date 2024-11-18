@@ -1,0 +1,60 @@
+extends index
+
+block content
+    .container.mt-5
+        h1.text-center.text-primary Editar Materia
+
+        //- Mensaje de error si existe
+        if error
+            .alert.alert-danger.text-center= error
+
+        //- Formulario de edición
+        form(action=`/materias/editar/${materia._id}?_method=PUT` method="POST" class="mt-4")
+
+            .mb-3
+                label.form-label(for="nombre") Nombre de la Materia
+                input.form-control(type="text" name="nombre" id="nombre" required value=materia.nombre disabled)
+
+            .mb-3
+                label.form-label(for="nivel") Nivel
+                select.form-select(name="nivel" id="nivel" value=materia.nivel)
+                    option(value="" disabled selected) Selecciona un nivel
+                    option(value="Primaria" selected=materia.nivel === 'Primaria') Primaria
+                    option(value="Secundaria" selected=materia.nivel === 'Secundaria') Secundaria
+            //- Desplegable de profesores
+            .mb-3
+                label.form-label(for="profesor") Profesor
+                select.form-select(name="profesor" id="profesor" required)
+                    option(value="" disabled selected) Selecciona un profesor
+                    each profesor in profesores
+                        option(value=profesor._id selected=(materia.profesor && profesor._id.toString() === materia.profesor._id.toString()))= profesor.nombres
+
+            //- Desplegable de grados (1 a 6)
+            .mb-3
+                label.form-label(for="grado") Grado
+                select.form-select(name="grado" id="grado" value=materia.grado)
+                    option(value="" disabled selected) Selecciona un grado
+                    each grado in grados
+                        option(value=grado selected=(materia.curso === grado))= grado
+
+            // Resto de los campos, como horario, se mantienen igual
+            .mb-3
+                label.form-label(for="horario[dia]") Día de la Semana
+                select.form-select(name="horario[dia]" id="horarioDia")
+                    option(value="" disabled selected) Selecciona un día
+                    option(value="Lunes") Lunes
+                    option(value="Martes") Martes
+                    option(value="Miércoles") Miércoles
+                    option(value="Jueves") Jueves
+                    option(value="Viernes") Viernes
+
+            .row
+                .col-md-6
+                    label.form-label(for="horario[horaInicio]") Hora de Inicio
+                    input.form-control(type="time" name="horario[horaInicio]" id="horaInicio" value=materia.horario.horaInicio)
+                .col-md-6
+                    label.form-label(for="horario[horaFin]") Hora de Fin
+                    input.form-control(type="time" name="horario[horaFin]" id="horaFin" value=materia.horario.horaFin)
+
+            .text-center
+                button.btn.btn-primary(type="submit") Guardar Cambios

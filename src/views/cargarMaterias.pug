@@ -11,7 +11,7 @@ block content
             .alert.alert-danger.text-center= error
 
         //- Formulario de carga de materia
-        form(action="/usuarios/materias/nueva" method="POST" class="mt-4")
+        form(action="/materias/nueva" method="POST" class="mt-4 needs-validation" onsubmit="return  manejarCargaMateria(this);")
             .mb-3
                 label.form-label(for="nombre") Nombre de la Materia
                 input.form-control(type="text" name="nombre" id="nombre" placeholder="Ejemplo: Matemáticas" required)
@@ -51,8 +51,56 @@ block content
 
             //- Botón de enviar
             .text-center
-                button.btn.btn-primary(type="submit") Cargar Materia
+                button.btn.btn-primary(type="submit" id="submitBtn") Cargar Materia
 
-        //- Enlace para volver
-        .text-center.mt-3
-            a.btn.btn-secondary(href="/usuarios/materias") Ver Todas las Materias
+            //- Enlace para volver
+            .text-center.mt-3
+                a.btn.btn-secondary(href="/usuarios/materias") Ver Todas las Materias
+
+
+        script.
+            function manejarCargaMateria(form) {
+                const formData = new FormData(form);
+                const data = {};
+
+                formData.forEach((value, key) => {
+                    data[key] = value;
+                });
+
+                fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                })
+                    .then(async response => {
+                        // Intenta leer el JSON incluso si el estado no es "ok"
+                        const result = await response.json();
+
+                        if (response.ok) {
+                            // Caso de éxito
+                            if (result.mensaje) {
+                                alert(result.mensaje);
+                                location.href = '/usuarios/materias'; // Redirección tras éxito
+                            } else {
+                                alert('Respuesta inesperada del servidor.');
+                            }
+                        } else {
+                            // Caso de error con detalles del servidor
+                            if (result.error) {
+                                alert('Error: ' + result.error);
+                            } else {
+                                alert('Hubo un problema al procesar la solicitud.');
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        // Caso de fallo en la conexión u otro problema de red
+                        console.error('Error en la petición:', error);
+                        alert('Hubo un problema al enviar la solicitud. Inténtalo de nuevo.');
+                    });
+
+                return false; // Evitar el comportamiento por defecto del formulario
+            }
+

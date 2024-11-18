@@ -16,8 +16,6 @@ block content
                 tr
                     th Nombre
                     th Nivel
-                    th Profesor
-                    th Curso
                     th Día
                     th Horario
                     th Acción
@@ -26,14 +24,33 @@ block content
                     tr
                         td= materia.nombre
                         td= materia.nivel
-                        td= materia.profesor ? materia.profesor.nombre : 'Sin asignar'
-                        td= materia.curso ? materia.curso.nombre : 'Sin asignar'
                         td= materia.horario.dia
                         td= materia.horario.horaInicio + ' - ' + materia.horario.horaFin
                         td
-                            a.btn.btn-warning(href=`/materias/editar/${materia._id}`) Editar
-                            a.btn.btn-danger.ml-2(href=`/materias/eliminar/${materia._id}`) Eliminar
+                            a.btn.btn-warning(href=`/usuarios/materias/editar/${materia._id}`) Editar
+                            a.btn.btn-danger.ml-2(href=`/usuarios/materias/eliminar/${materia._id}`) Eliminar
 
         //- Enlace para agregar nueva materia
         .text-center.mt-4
             a.btn.btn-primary(href="/materias/nueva") Cargar Nueva Materia
+
+        script.
+            function eliminarMateria(id) {
+                if (confirm('¿Estás seguro de que quieres eliminar esta materia?')) {
+                fetch(`/materias/eliminar/${materia._id}`, {
+                    method: 'DELETE',
+                })
+                .then(response => {
+                    if (response.ok) {
+                    alert('Materia eliminada exitosamente');
+                    location.reload(); // Recargar la página para reflejar los cambios
+                    } else {
+                    alert('Error al eliminar Materia');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Hubo un problema al eliminar materia.');
+                });
+                }
+            }
