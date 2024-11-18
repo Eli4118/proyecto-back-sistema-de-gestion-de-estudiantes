@@ -1,0 +1,106 @@
+extends index
+
+block content
+    .container.mt-5
+        h1.text-center.text-primary Cargar Materia
+
+        //- Mensaje de éxito o error
+        if mensaje
+            .alert.alert-success.text-center= mensaje
+        if error
+            .alert.alert-danger.text-center= error
+
+        //- Formulario de carga de materia
+        form(action="/materias/nueva" method="POST" class="mt-4 needs-validation" onsubmit="return  manejarCargaMateria(this);")
+            .mb-3
+                label.form-label(for="nombre") Nombre de la Materia
+                input.form-control(type="text" name="nombre" id="nombre" placeholder="Ejemplo: Matemáticas" required)
+
+            .mb-3
+                label.form-label(for="nivel") Nivel
+                select.form-select(name="nivel" id="nivel" required)
+                    option(value="" disabled selected) Selecciona un nivel
+                    option(value="Primaria") Primaria
+                    option(value="Secundaria") Secundaria
+
+            .mb-3
+                label.form-label(for="profesor") Profesor (ID)[Opcional]
+                input.form-control(type="text" name="profesor" id="profesor" placeholder="ID del profesor" )
+
+            .mb-3
+                label.form-label(for="curso") Curso (ID)[Opcional]
+                input.form-control(type="text" name="curso" id="curso" placeholder="ID del curso" )
+
+            .mb-3
+                label.form-label(for="horario[dia]") Día de la Semana
+                select.form-select(name="horario[dia]" id="horarioDia" )
+                    option(value="" disabled selected) Selecciona un día
+                    option(value="Lunes") Lunes
+                    option(value="Martes") Martes
+                    option(value="Miércoles") Miércoles
+                    option(value="Jueves") Jueves
+                    option(value="Viernes") Viernes
+
+            .row
+                .col-md-6
+                    label.form-label(for="horario[horaInicio]") Hora de Inicio
+                    input.form-control(type="time" name="horario[horaInicio]" id="horaInicio" )
+                .col-md-6
+                    label.form-label(for="horario[horaFin]") Hora de Fin
+                    input.form-control(type="time" name="horario[horaFin]" id="horaFin" )
+
+            //- Botón de enviar
+            .text-center
+                button.btn.btn-primary(type="submit" id="submitBtn") Cargar Materia
+
+            //- Enlace para volver
+            .text-center.mt-3
+                a.btn.btn-secondary(href="/usuarios/materias") Ver Todas las Materias
+
+
+        script.
+            function manejarCargaMateria(form) {
+                const formData = new FormData(form);
+                const data = {};
+
+                formData.forEach((value, key) => {
+                    data[key] = value;
+                });
+
+                fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                })
+                    .then(async response => {
+                        // Intenta leer el JSON incluso si el estado no es "ok"
+                        const result = await response.json();
+
+                        if (response.ok) {
+                            // Caso de éxito
+                            if (result.mensaje) {
+                                alert(result.mensaje);
+                                location.href = '/usuarios/materias'; // Redirección tras éxito
+                            } else {
+                                alert('Respuesta inesperada del servidor.');
+                            }
+                        } else {
+                            // Caso de error con detalles del servidor
+                            if (result.error) {
+                                alert('Error: ' + result.error);
+                            } else {
+                                alert('Hubo un problema al procesar la solicitud.');
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        // Caso de fallo en la conexión u otro problema de red
+                        console.error('Error en la petición:', error);
+                        alert('Hubo un problema al enviar la solicitud. Inténtalo de nuevo.');
+                    });
+
+                return false; // Evitar el comportamiento por defecto del formulario
+            }
+

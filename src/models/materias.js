@@ -12,6 +12,11 @@ const MateriaSchema = new mongoose.Schema({
       message: 'El nombre de la materia solo puede contener letras y espacios'
     }
   },
+  nivel: { 
+    type: String, 
+    enum: ['Primaria', 'Secundaria'], 
+    required: true 
+}, // Campo para definir el nivel
   profesor: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Usuario', // Relaciona la materia con el profesor que la dicta
@@ -24,15 +29,15 @@ const MateriaSchema = new mongoose.Schema({
     dia: {
       type: String,
       enum: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'],
-      required: true
+     
     },
     horaInicio: {
       type: String,
-      required: true // Formato de 24 horas, por ejemplo, '14:00'
+      
     },
     horaFin: {
       type: String,
-      required: true // Formato de 24 horas, por ejemplo, '16:00'
+      
     }
   },
 });

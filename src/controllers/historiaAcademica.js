@@ -130,8 +130,8 @@ async function verNotas(req, res) {
       const { estudianteId, materiaId, calificacion, tipoEvaluacion, observaciones } = req.body;
 
       // Validar que la calificación esté en el rango permitido 
-      if (calificacion < 0 || calificacion > 10) {
-        return res.status(400).send('La calificación debe estar entre 0 y 10.');
+      if (calificacion < 1 || calificacion > 10) {
+        return res.status(400).send('La calificación debe estar entre 1 y 10.');
       }
 
       // Crear una nueva nota
