@@ -92,9 +92,11 @@ const UsuarioSchema = new mongoose.Schema({
   cursoAsignado: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'Curso' 
-  }
-  
-  
+  },
+  contraseña: {
+    type: String,
+    required: [true, 'La contraseña es obligatoria']
+  }  
 });
 
 
