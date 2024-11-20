@@ -34,6 +34,10 @@ block content
         label(for="dni") DNI:
         input.form-control(type="number" name="dni" placeholder="12345678" required min="0")
 
+      .form-group
+        label(for="password") Contraseña:
+        input.form-control(type="password" name="password" id="password" required placeholder="******")
+
       .additional-fields(id="estudianteFields" style="display:none")
         .form-group
           label(for="grado") Grado:
@@ -124,10 +128,8 @@ block content
         })
         .then(response => response.json())
         .then(result => {
-          
-     
-            alert(result.message);
-            location.reload();
+          alert(result.message);
+          location.reload();
         })
         .catch(error => {
           console.error('Error al registrar el usuario:', error);
