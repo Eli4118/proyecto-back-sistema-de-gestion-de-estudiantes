@@ -2,6 +2,7 @@ const Usuario = require('../models/usuarios'); // Importa el esquema base
 const { setUsuarioAutenticado } = require('../utils/session');
 const { createAccessToken } = require('../utils/jwt'); // Importa la función para crear tokens
 const { compararPass } = require('../utils/bcrypt'); // Asegúrate de que bcrypt está instalado y configurado
+const cookieConfig = require('../utils/cookie'); // Configuración de cookies
 
 const SesionController = {
   login: async (req, res) => {
@@ -28,34 +29,22 @@ const SesionController = {
       });
 
       // Establecer la cookie con el token
-      res.cookie('authToken', token, {
-        httpOnly: true, // La cookie no está disponible en el cliente mediante JavaScript
-        secure: process.env.NODE_ENV === 'production', // Solo usa cookies seguras en producción
-        sameSite: 'strict', // Ayuda a prevenir ataques CSRF
-        maxAge: 30 * 60 * 1000, // 30 minutos de expiración
-      });
-
-      // Opcional: Simulación de sesión
-      setUsuarioAutenticado(usuario);
+      res.cookie('authToken', token, cookieConfig);
 
       return res.redirect('/home2');
     } catch (error) {
-
       res.status(500).json({ mensaje: 'Error al iniciar sesión', error: error.message });
     }
   },
 
-  // Cierre de sesión
   logout: (req, res) => {
-    // Limpiar la cookie
     res.clearCookie('authToken', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
     });
 
-    setUsuarioAutenticado(null);
-    res.redirect('/')
+    res.redirect('/');
   },
 };
 

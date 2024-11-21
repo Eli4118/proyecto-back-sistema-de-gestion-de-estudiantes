@@ -1,19 +1,17 @@
-const { getUsuarioAutenticado } = require('../utils/session');
-
 const verificarRol = (rolesPermitidos) => {
   return (req, res, next) => {
-    // Obtener el usuario autenticado
-    const usuario = getUsuarioAutenticado();
-    // Si el usuario no está autenticado, redirigir al login con un mensaje
+    const usuario = req.usuario; // Obtener usuario desde el middleware anterior
+
     if (!usuario) {
-      return res.redirect('/');
+      return res.status(401).json({ mensaje: 'No autorizado' });
     }
-    // Si el usuario no tiene el rol adecuado, redirigir al login con un mensaje
+
     if (!rolesPermitidos.includes(usuario.rol)) {
-      return res.redirect('/');
+      return res.status(403).json({ mensaje: 'Permiso denegado' });
     }
-    // Si el usuario tiene el rol adecuado, continuar
-    next();
+
+    next(); // Usuario tiene el rol adecuado
   };
 };
+
 module.exports = verificarRol;

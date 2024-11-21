@@ -1,16 +1,11 @@
-// middleware/sessionData.js
-const { getUsuarioAutenticado } = require('../utils/session');
-
-// Middleware para pasar la información de la sesión a las vistas
-const sessionData = (req, res, next) => {
-    // Obtener el usuario autenticado de la sesión
-    const usuario = getUsuarioAutenticado();
-
-    // Pasar el usuario a las vistas como una variable global
-    res.locals.usuarioAutenticado = usuario;
-
-    // Continuar con la siguiente función de middleware o ruta
+// middlewares/agregarUsuarioAVista.js
+const agregarUsuarioAVista = (req, res, next) => {
+    // Verifica si el usuario está autenticado y sus datos están en req.usuario
+    res.locals.usuarioAutenticado = req.usuario || null;
+  
+    // Continúa con el siguiente middleware o controlador
     next();
-};
-
-module.exports = sessionData;
+  };
+  
+  module.exports = agregarUsuarioAVista;
+  

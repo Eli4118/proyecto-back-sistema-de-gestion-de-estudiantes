@@ -6,11 +6,13 @@ const router = express.Router();
 const verificarRol = require('../middleware/verificarRol')
 const {verNotas} = require('../controllers/historiaAcademica')
 const MateriaController = require('../controllers/materias');
+const autenticarJWT = require('../middleware/autenticarJWT')
+const agregarUsuarioAVista = require('../middleware/sessionData')
 //Renderiza pagina home 
 router.get('/', (req, res, next) => {res.render('home')})
-router.get('/home2',verificarRol(['administrativo','tutor','profesor','estudiante']), (req, res, next) => {res.render('home2')})
+router.get('/home2',autenticarJWT,agregarUsuarioAVista, verificarRol(['administrativo','tutor','profesor','estudiante']), (req, res, next) => {res.render('home2')})
 // Renderiza pagina formulario de registro solo se admite al administrativo
-router.get('/registro',verificarRol(['administrativo']),(req, res, next) => {res.render("registro")})
+router.get('/registro',autenticarJWT,agregarUsuarioAVista, verificarRol(['administrativo']),(req, res, next) => {res.render("registro")})
 router.get('/materias',verificarRol(['administrativo']),(req, res, next) => {res.render('gest-materias')})
 //router.get('/materias/nueva',verificarRol(['administrativo']),(req, res, next) => {res.render('cargarMaterias')})
 //router.get('/editar/:id',(req, res, next) => {res.render('editar')})
@@ -18,7 +20,7 @@ router.get('/materias',verificarRol(['administrativo']),(req, res, next) => {res
 // Llama al router de profesor
 router.use('/profesor',verificarRol(['profesor']),profesorRouter)
 //  Llama al router de usuarios
-router.use('/usuarios', usuariosRouter);
+router.use('/usuarios', autenticarJWT,agregarUsuarioAVista, usuariosRouter);
 //  Llama al router de usuarios
 router.use('/login', sesionRouter);
 // visualiza las notas de 1 estudiante
