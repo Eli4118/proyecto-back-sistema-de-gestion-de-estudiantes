@@ -15,6 +15,7 @@ block content
             thead
                 tr
                     th Nombre
+                    th Turno 
                     th Nivel
                     th Grado
                     th Division
@@ -23,16 +24,17 @@ block content
                 each materia in materias
                     tr
                         td= materia.nombre
-                        td= materia.nivel
-                        td= materia.grado
-                        td= materia.division
+                        td= materia.curso ? materia.curso.turno : 'No asignado'
+                        td= materia.curso ? materia.curso.nivel : 'No asignado'
+                        td= materia.curso ? materia.curso.grado : 'No asignado'
+                        td= materia.curso ? materia.curso.division : 'No asignado'
                         td
                             a.btn.btn-warning(href=`/usuarios/materias/editar/${materia._id}`) Editar
                             button.btn.btn-danger.ml-2(onclick=`eliminarMateria('${materia._id}')`) Eliminar
 
         //- Enlace para agregar nueva materia
         .text-center.mt-4
-            a.btn.btn-primary(href="/materias/nueva") Cargar Nueva Materia
+            a.btn.btn-primary(href="/usuarios/materias/nueva") Cargar Nueva Materia
 
         //- Script para manejar la eliminación
         script.

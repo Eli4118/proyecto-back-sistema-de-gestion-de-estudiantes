@@ -1,121 +1,204 @@
 const Materia = require('../models/materias');
 const Usuario = require('../models/usuarios');
 const Curso = require('../models/cursos');
+const mongoose = require('mongoose');
 
 const MateriaController = {
     cargarMateria: async (req, res) => {
-        const { nombre, nivel, profesor, curso, horario } = req.body;
-        
-        try {
-            // Verificar si la materia ya existe en ese nivel
-            const materiaExistente = await Materia.findOne({ nombre, nivel });
+        const { nombre, nivel, grado, division, turno, profesor, horario } = req.body; 
+        const gradoNumero = Number(grado);
+        console.log('Criterios de búsqueda1:', { grado: gradoNumero, nivel, division, turno });
 
-            if (materiaExistente) {
-                return res.status(400).json({ 
-                    error: `La materia "${nombre}" ya existe en el nivel "${nivel}".` 
+        try {
+            // Buscar el curso por grado, nivel, división y turno
+            const curso = await Curso.findOne({ grado: gradoNumero,nivel: { $regex: new RegExp(`^${nivel}$`, 'i') }, division, turno });
+            
+            if (!curso) {
+                return res.status(400).json({
+                    error: 'No se encontró el curso especificado. Verifica los datos ingresados.',
                 });
             }
-
-        // Construir el objeto de la nueva materia
-        const nuevaMateriaData = {
-            nombre,
-            nivel,
-            profesor: profesor || null,
-            curso: curso || null,
-            horario: horario || null,
-        };
-
-        // Solo agregar 'profesor' si se proporciona un valor válido
-        if (profesor && mongoose.Types.ObjectId.isValid(profesor)) {
-            nuevaMateriaData.profesor = profesor;
+    
+            // Verificar si ya existe una materia con el mismo nombre para el mismo curso
+            const materiaExistente = await Materia.findOne({
+                nombre,
+                curso: curso._id,
+            });
+    
+            if (materiaExistente) {
+                return res.status(400).json({
+                    error: `La materia "${nombre}" ya está asignada al curso con nivel "${nivel}", grado "${grado}", división "${division}" y turno "${turno}".`,
+                });
+            }
+    
+            // Validar que el ID del profesor sea válido (si se proporciona)
+            let profesorValido = null;
+            if (profesor && mongoose.Types.ObjectId.isValid(profesor)) {
+                profesorValido = profesor;
+            }
+    
+            // Crear la nueva materia
+            const nuevaMateriaData = {
+                nombre,
+                profesor: profesorValido || null, // Asociar profesor si es válido
+                curso: curso._id, // Asociar la materia al curso
+                horario: horario || null, // Si no se proporciona, dejar como null
+            };
+    
+            const nuevaMateria = new Materia(nuevaMateriaData);
+            await nuevaMateria.save();
+    
+            return res.status(201).json({
+                mensaje: 'Materia creada exitosamente',
+                materia: nuevaMateria,
+            });
+        } catch (error) {
+            console.error('Error al crear materia:', error);
+            return res.status(500).json({
+                error: 'Error al crear la materia',
+                detalles: error.message,
+            });
         }
-
-        // Solo agregar 'curso' si se proporciona un valor válido
-        if (curso && mongoose.Types.ObjectId.isValid(curso)) {
-            nuevaMateriaData.curso = curso;
-        }
-        
-        // Crear la nueva materia con los datos
-        const nuevaMateria = new Materia(nuevaMateriaData);
-
-        // Guardar la nueva materia en la base de datos
-        await nuevaMateria.save();
-        
-        return res.status(201).json({ mensaje: 'Materia creada exitosamente', materia: nuevaMateria });
-    } catch (error) {
-        console.error('Error al crear materia:', error);
-        return res.status(400).json({ error: 'Error al crear la materia', details: error.message });
-    }
     },
-
+    
+    
+    cargarFormulario: async (req, res) => {
+        try {
+            // Obtener materias para el datalist
+            const materias = await Materia.find().select('nombre').lean();
+    
+            // Obtener niveles (puedes hacerlo estático o desde la BD si tienes un esquema para niveles)
+            const niveles = ["Primaria", "Secundaria"]; // Ejemplo estático
+    
+            // Obtener grados únicos desde la colección de cursos
+            const grados = await Curso.distinct('grado');
+    
+            // Obtener divisiones únicas desde la colección de cursos
+            const divisiones = await Curso.distinct('division');
+    
+            // Obtener turnos únicos desde la colección de cursos
+            const turnos = await Curso.distinct('turno');
+    
+            // Obtener profesores desde la colección de usuarios con rol "profesor"
+            const profesores = await Usuario.find({ rol: "profesor" }).select('nombres apellidos _id').lean();
+    
+            // Renderizar la vista y pasar los datos
+            res.render('cargarMaterias', { materias, niveles, grados, divisiones, turnos, profesores });
+        } catch (error) {
+            console.error('Error al cargar datos del formulario:', error);
+            res.status(500).send('Error al cargar el formulario.');
+        }
+    },
     mostrarMaterias: async (req, res) => {
         try {
-            // Obtener todas las materias desde la base de datos
+            // Obtener todas las materias con sus cursos y profesores
             const materias = await Materia.find()
-                .populate('profesor')  // Esto obtiene los datos completos del profesor (si es necesario)
-                .populate('curso')   // Esto obtiene los datos completos del curso (si es necesario)
+                .populate('profesor', 'nombres apellidos') // Opcional, trae solo nombres y apellidos
+                .populate('curso') // Trae todos los datos del curso
                 .exec();
-            // Renderizar la vista de la lista de materias
+    
+            // Renderizar la vista con las materias
             res.render('materias', { materias });
         } catch (error) {
-            // Manejar errores y renderizar un mensaje adecuado
+            // Manejo de errores
             res.status(500).render('error', { 
                 mensaje: 'Error al obtener las materias', 
                 error: error.message 
             });
         }
     },
-
+    
     mostrarFormularioEdicion: async (req, res) => {
+        
         try {
-            const materia = await Materia.findById(req.params.id)
-                .populate('profesor') // Trae solo el nombre del profesor
-                .populate('curso');  // Trae solo el nombre del curso
-                
-            if (!materia) {
-                return res.status(404).send('Materia no encontrada');
-            }
+            const { id } = req.params; // ID de la materia a editar
+            // Obtener materias para el datalist
+            const materia = await Materia.findById(id)
+            .populate('profesor')
+            .populate('curso')
+            .exec();
     
-            // Obtener todos los profesores que podrían dar esa materia, basándonos en el nivel
-            const profesores = await Usuario.find({
-                'materias.nivel': materia.nivel // Busca profesores que enseñen en el nivel de la materia
-            }, 'nombre');
-
-            // Obtener todos los grados (del 1 al 6)
-            const grados = [1, 2, 3, 4, 5, 6];
-
-            // Renderiza la vista de edición con los datos precargados
-            res.render('editar', {
-                materia,
-                profesores, // Profesores disponibles para ese nivel
-                grados,     // Grados disponibles (1 a 6)
-            });
+            // Obtener niveles (puedes hacerlo estático o desde la BD si tienes un esquema para niveles)
+            const niveles = ["Primaria", "Secundaria"]; // Ejemplo estático
+    
+            // Obtener grados únicos desde la colección de cursos
+            const grados = await Curso.distinct('grado');
+    
+            // Obtener divisiones únicas desde la colección de cursos
+            const divisiones = await Curso.distinct('division');
+    
+            // Obtener turnos únicos desde la colección de cursos
+            const turnos = await Curso.distinct('turno');
+    
+            // Obtener profesores desde la colección de usuarios con rol "profesor"
+            const profesores = await Usuario.find({ rol: "profesor" }).select('nombres apellidos _id').lean();
+    
+            // Renderizar la vista y pasar los datos
+            res.render('editar', { materia, niveles, grados, divisiones, turnos, profesores });
         } catch (error) {
-            res.status(500).send('Error al cargar la materia');
-        }
-    },   
-    editarMateria: async (req, res) => {
-        try {
-            const { id } = req.params;
-            const { nombre, nivel, profesor, curso, horario } = req.body;
-    
-            const materiaEditada = await Materia.findByIdAndUpdate(
-                id,
-                { nombre, nivel, profesor, curso, horario },
-                { new: true, runValidators: true }
-            );
-    
-            if (!materiaEditada) {
-                return res.status(404).render('error', { mensaje: 'Materia no encontrada para editar' });
-            }
-    
-            // Redirige al listado de materias
-            res.json({ message: 'Materia editada con éxito' });  // En lugar de res.redirect, devolver una respuesta JSON.
-        } catch (error) {
-            console.error('Error al editar materia:', error);
-            res.status(500).render('error', { mensaje: 'Error al editar materia' });
+            console.error('Error al cargar datos del formulario:', error);
+            res.status(500).send('Error al cargar el formulario.');
         }
     },
+     
+    editarMateria: async (req, res) => {
+        const { id } = req.params; // ID de la materia a editar
+        const { nombre,nivel, grado, division, turno, profesor, horario } = req.body; 
+        const gradoNumero = Number(grado);
+        try {
+            // Buscar el curso por grado, nivel, división y turno
+            const curso = await Curso.findOne({ grado: gradoNumero,nivel: { $regex: new RegExp(`^${nivel}$`, 'i') }, division, turno });
+            
+            if (!curso) {
+                return res.status(400).json({
+                    error: 'No se encontró el curso especificado. Verifica los datos ingresados.',
+                });
+            }
+    
+            // Verificar si ya existe una materia con el mismo nombre para el mismo curso
+            const materiaExistente = await Materia.findOne({
+                nombre,
+                curso: curso._id,
+            });
+    
+            if (materiaExistente) {
+                return res.status(400).json({
+                    error: `La materia "${nombre}" ya está asignada al curso con nivel "${nivel}", grado "${grado}", división "${division}" y turno "${turno}".`,
+                });
+            }
+    
+            // Validar que el ID del profesor sea válido (si se proporciona)
+            let profesorValido = null;
+            if (profesor && mongoose.Types.ObjectId.isValid(profesor)) {
+                profesorValido = profesor;
+            }
+    
+            // Actualizar la materia
+            const materiaActualizada = await Materia.findByIdAndUpdate(
+                id,
+                {
+                    $set: {
+                        profesor: profesorValido || null, // Asociar profesor si es válido
+                        curso: curso._id, // Asociar la materia al curso
+                        horario: horario || null, // Si no se proporciona, dejar como null
+                    },
+                },
+                { new: true } // Retornar el documento actualizado
+            );
+    
+            if (!materiaActualizada) {
+                return res.status(404).json({ message: 'Materia no encontrada' });
+            }
+    
+            // Responder con éxito
+            res.status(200).json({ message: 'Materia actualizada exitosamente', materia: materiaActualizada });
+        } catch (error) {
+            console.error('Error al actualizar la materia:', error);
+            res.status(500).json({ message: 'Error al actualizar la materia', error: error.message });
+        }
+    },
+    
+    
     
     eliminarMateria: async (req, res) => {
         try {

@@ -3,64 +3,89 @@ extends index
 block content
     .container.mt-5
         h1.text-center.text-primary Editar Materia
-         // Mensaje de éxito o error
-        if successMessage
-            .alert.alert-success= successMessage
-        if errorMessage
-            .alert.alert-danger= errorMessage
 
+        //- Mensaje de éxito o error
+        if mensaje
+            .alert.alert-success.text-center= mensaje
+        if error
+            .alert.alert-danger.text-center= error
         //- Formulario de edición
-        form#updateUserForm(action=`/usuarios/materias/editar/${materia._id}?_method=PUT` method="POST" class="mt-4")
+        form#updateUserForm(action=`/usuarios/materias/editar/${materia._id} ` method="PUT" class="needs-validation" novalidate)
+        
+            .mb-3
+                label(for="nombre") Nombre de la Materia
+                input#nombre.form-control(type="text" name="nombre" readonly value=materia.nombre)
 
             .mb-3
-                label.form-label(for="nombre") Nombre de la Materia
-                input.form-control(type="text" name="nombre" id="nombre" required value=materia.nombre disabled)
-
-            .mb-3
-                label.form-label(for="nivel") Nivel
-                select.form-select(name="nivel" id="nivel" value=materia.nivel)
+                label(for="nivel") Nivel
+                select#nivel.form-select(name="nivel" required)
                     option(value="" disabled selected) Selecciona un nivel
-                    option(value="Primaria" selected=materia.nivel === 'Primaria') Primaria
-                    option(value="Secundaria" selected=materia.nivel === 'Secundaria') Secundaria
-            //- Desplegable de profesores
+                    if niveles && niveles.length
+                        each nivel in niveles
+                            option(value=nivel selected=(materia.nivel === nivel))= nivel
+                    else
+                        option(value="" disabled) No hay niveles disponibles
             .mb-3
-                label.form-label(for="profesor") Profesor
-                select.form-select(name="profesor" id="profesor" )
-                    option(value="" disabled selected) Selecciona un profesor
-                    each profesor in profesores
-                        option(value=profesor._id selected=(materia.profesor && profesor._id.toString() === materia.profesor._id.toString()))= profesor.nombres
-
-            //- Desplegable de grados (1 a 6)
-            .mb-3
-                label.form-label(for="grado") Grado
-                select.form-select(name="grado" id="grado" value=materia.grado)
+                label(for="grado") Grado
+                select#grado.form-select(name="grado")
                     option(value="" disabled selected) Selecciona un grado
-                    each grado in grados
-                        option(value=grado selected=(materia.curso === grado))= grado
-
-            // Resto de los campos, como horario, se mantienen igual
+                    if grados && grados.length
+                        each grado in grados
+                            option(value=grado selected=(materia.grado === grado))= grado
+                    else
+                        option(value="" disabled) No hay grados disponibles
             .mb-3
-                label.form-label(for="horario[dia]") Día de la Semana
-                select.form-select(name="horario[dia]" id="horarioDia")
+                label(for="division") Division
+                select#grado.form-select(name="division" )
+                    option(value="" disabled selected) Selecciona una division
+                    if divisiones && divisiones.length
+                        each division in divisiones
+                            option(value=division selected=(materia.division === division))= division
+                    else
+                        option(value="" disabled) No hay division disponibles
+            .mb-3
+                label(for="turno") Turno
+                select#grado.form-select(name="turno" )
+                    option(value="" disabled selected) Selecciona un turno
+                    if turnos && turnos.length
+                        each turno in turnos
+                            option(value=turno selected=(materia.turno === turno))= turno
+                    else
+                        option(value="" disabled) No hay turnos disponibles 
+                        
+
+            .mb-3
+                label(for="profesor") Profesor
+                select#profesor.form-select(name="profesor")
+                    option(value="" disabled selected) Selecciona un profesor
+                    if profesores && profesores.length
+                        each profesor in profesores
+                            option(value=profesor._id selected=(materia.profesor && materia.profesor._id === profesor._id))= `${profesor.nombres} ${profesor.apellidos}`
+                    else
+                        option(value="" disabled) No hay profesores disponibles 
+                        
+
+            .mb-3
+                label(for="horario[dia]") Día de la Semana
+                select#horarioDia.form-select(name="horario[dia]")
                     option(value="" disabled selected) Selecciona un día
-                    option(value="Lunes") Lunes
-                    option(value="Martes") Martes
-                    option(value="Miércoles") Miércoles
-                    option(value="Jueves") Jueves
-                    option(value="Viernes") Viernes
+                    option(value="Lunes" selected=(materia.horario.dia === 'Lunes')) Lunes
+                    option(value="Martes" selected=(materia.horario.dia === 'Martes')) Martes
+                    option(value="Miércoles" selected=(materia.horario.dia === 'Miércoles')) Miércoles
+                    option(value="Jueves" selected=(materia.horario.dia === 'Jueves')) Jueves
+                    option(value="Viernes" selected=(materia.horario.dia === 'Viernes')) Viernes
 
-            .row
-                .col-md-6
-                    label.form-label(for="horario[horaInicio]") Hora de Inicio
-                    input.form-control(type="time" name="horario[horaInicio]" id="horaInicio" value=materia.horario.horaInicio)
-                .col-md-6
-                    label.form-label(for="horario[horaFin]") Hora de Fin
-                    input.form-control(type="time" name="horario[horaFin]" id="horaFin" value=materia.horario.horaFin)
+            .mb-3
+                label(for="horario[horaInicio]") Hora de Inicio
+                input#horaInicio.form-control(type="time" name="horario[horaInicio]" value=materia.horario.horaInicio)
 
-            .text-center
-                button.btn.btn-primary(type="submit") Guardar Cambios
+            .mb-3
+                label(for="horario[horaFin]") Hora de Fin
+                input#horaFin.form-control(type="time" name="horario[horaFin]" value=materia.horario.horaFin)
 
-        // Script para manejar el envío del formulario
+            button.btn.btn-primary(type="submit" id="submitBtn") Guardar Cambios
+
+
         script.
             document.getElementById('updateUserForm').addEventListener('submit', async function(event) {
                 event.preventDefault(); // Previene el envío tradicional del formulario
@@ -70,7 +95,7 @@ block content
 
                 try {
                     const response = await fetch(this.action, {
-                        method: 'PUT', // Cambia a 'PUT' si usas 'PUT' directamente en el formulario
+                        method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
                         },
@@ -80,10 +105,13 @@ block content
                     const result = await response.json(); // Espera la respuesta y la convierte a JSON
 
                     if (response.ok) {
-                        alert(result.message); // Muestra el mensaje de éxito
-                        window.location.href = '/usuarios/materias'; // Redirige a la lista de materias
+                        // Si la respuesta es exitosa, muestra el mensaje
+                        alert(result.message);
+                        // Redirige o actualiza la página según sea necesario
+                        window.location.href = '/usuarios/materias'; // Descomentar para redirigir
                     } else {
-                        alert(result.message); // Muestra el mensaje de error
+                        // Muestra el mensaje de error
+                        alert(result.message);
                     }
                 } catch (error) {
                     console.error('Error al actualizar el usuario:', error);

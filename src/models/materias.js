@@ -12,11 +12,7 @@ const MateriaSchema = new mongoose.Schema({
       message: 'El nombre de la materia solo puede contener letras y espacios'
     }
   },
-  nivel: { 
-    type: String, 
-    enum: ['Primaria', 'Secundaria'], 
-    required: true 
-}, // Campo para definir el nivel
+
   profesor: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Usuario', // Relaciona la materia con el profesor que la dicta

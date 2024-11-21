@@ -28,6 +28,7 @@ usuarioRouter.delete('/:dni',verificarRol(['administrativo']), usuarioController
 
 //rutas para materias
 usuarioRouter.get('/materias',verificarRol(['administrativo']),MateriaController.mostrarMaterias);
+usuarioRouter.get('/materias/nueva',verificarRol(['administrativo']),MateriaController.cargarFormulario);
 usuarioRouter.post('/materias/nueva',verificarRol(['administrativo']),MateriaController.cargarMateria);
 // Ruta para mostrar el formulario de edición
 usuarioRouter.get('/materias/editar/:id',verificarRol(['administrativo']),MateriaController.mostrarFormularioEdicion);
