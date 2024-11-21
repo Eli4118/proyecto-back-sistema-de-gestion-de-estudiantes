@@ -1,3 +1,4 @@
+const { encriptarPass} = require('../utils/bcrypt')
 const { model } = require("mongoose");
 const Usuario = require('../models/usuarios'); // Importa el esquema base
 const Curso = require('../models/cursos');
@@ -6,7 +7,9 @@ const UsuarioController = {
   registro: async (req, res) => {
     try {
       const { rol, ...usuarioData } = req.body;
-  
+      const passEncriptado = await encriptarPass(usuarioData.password);
+      usuarioData.password = passEncriptado; // Reemplaza el valor del password
+      
       let nuevoUsuario;
   
       // Se maneja el rol para registrar el usuario correcto
@@ -155,15 +158,20 @@ const UsuarioController = {
 
   actualizar: async (req, res) => {
     try {
-      const datosAActualizar = {}; // Creamos un objeto vacío para los datos a actualizar
-
-      // Solo agregamos al objeto los campos que están presentes en req.body
-      Object.keys(req.body).forEach(campo => {
-        if (req.body[campo] !== undefined) {
-          datosAActualizar[campo] = req.body[campo];
+      const datosAActualizar = {}; // Objeto para los datos a actualizar
+      // Recorremos los campos de req.body
+      for (const [campo, valor] of Object.entries(req.body)) {
+        if (valor !== undefined) {
+          // Si el campo es password, encriptamos la contraseña
+          if (campo === 'password') {
+            const passEncriptado = await encriptarPass(valor);
+            datosAActualizar[campo] = passEncriptado;
+          } else {
+            datosAActualizar[campo] = valor; // Agregar otros campos tal cual
+          }
         }
-      });
-
+      }
+     
       // Buscamos y actualizamos por DNI
       const usuarioActualizado = await Usuario.findOneAndUpdate(
         { dni: req.params.dni },
