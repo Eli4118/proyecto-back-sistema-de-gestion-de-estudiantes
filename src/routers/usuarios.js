@@ -16,9 +16,9 @@ usuarioRouter.get('/tutor/:dni',verificarRol(['tutor']), verNotas1);
 // Crear usuario
 usuarioRouter.post('/',verificarRol(['administrativo']), usuarioController.registro); 
 // Listar todos los usuarios
-usuarioRouter.get('/',verificarRol(['administrativo']),usuarioController.listar);
+usuarioRouter.get('/listar',verificarRol(['administrativo']),usuarioController.listar);
 // Listar todos los estudiantes
-usuarioRouter.get('/cursos',verificarRol(['administrativo']),usuarioController.filtrarEstudiantes);
+usuarioRouter.get('/estudiantes',verificarRol(['administrativo']),usuarioController.filtrarEstudiantes);
 // Actualizar usuario
 usuarioRouter.put('/:dni',verificarRol(['administrativo']),usuarioController.actualizar);
 // visualiza la pagina de Actualizar usuario
@@ -36,6 +36,10 @@ usuarioRouter.get('/materias/editar/:id',verificarRol(['administrativo']),Materi
 usuarioRouter.put('/materias/editar/:id',verificarRol(['administrativo']),MateriaController.editarMateria);
 // Ruta para eliminar una materia
 usuarioRouter.delete('/materias/eliminar/:id',verificarRol(['administrativo']), MateriaController.eliminarMateria); 
+
+usuarioRouter.get('/cursos',verificarRol(['administrativo']),MateriaController.obtenerCursos);
+usuarioRouter.get('/cursos/:id',verificarRol(['administrativo']),MateriaController.obtenerCursoPorId);
+
 //funciones que no se utilizan por el momento
 // Obtener usuario por dni
 //usuarioRouter.get('/dni/:dni', usuarioController.buscarPorDni);
