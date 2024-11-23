@@ -3,11 +3,20 @@ const { model } = require("mongoose");
 const Usuario = require('../models/usuarios'); // Importa el esquema base
 const Curso = require('../models/cursos');
 const { registrarEstudiante, registrarTutor, registrarProfesor, registrarAdministrador, asignarEstudiantesACurso } = require('./funciones/registroRoles');
+const { validationResult } = require('express-validator');
+
 const UsuarioController = {
   registro: async (req, res) => {
+
+    const { rol, ...usuarioData } = req.body;
+
+    console.log('Contraseña recibida:', usuarioData.password);
     try {
-      const { rol, ...usuarioData } = req.body;
+      
+      
+      console.log('Datos procesados:', usuarioData);
       const passEncriptado = await encriptarPass(usuarioData.password);
+      console.log('Contraseña encriptada:', passEncriptado);
       usuarioData.password = passEncriptado; // Reemplaza el valor del password
       
       let nuevoUsuario;
@@ -27,17 +36,21 @@ const UsuarioController = {
           nuevoUsuario = await registrarAdministrador(usuarioData);
           break;
         default:
-          // Mensaje de rol no válido enviado al front-end
-          return res.status(400).json({ message:("Rol no válido")});
+          // Rol no válido, lanzar un error que será capturado por el middleware
+          const error = new Error('Rol no válido');
+          error.statusCode = 400;
+          throw error;
       }
-  
-      // Mensaje de éxito enviado al front-end
-      //controlar mensaje de error
-      return res.status(201).json({ message:("Usuario registrado exitosamente")});
+
+      // Enviar respuesta de éxito al cliente
+      return res.status(201).json({
+        success: true,
+        message: 'Usuario registrado exitosamente',
+        data: nuevoUsuario, // Opcional: enviar información del usuario registrado
+      });
     } catch (error) {
-      //console.log(error);
-      // Mensaje de error  enviado al front-end
-      return res.status(400).json({ message:("Error al registrar usuario: ${error.message}")});
+      // Pasar el error al middleware de gestión de errores
+      next(error);
     }
   },
   

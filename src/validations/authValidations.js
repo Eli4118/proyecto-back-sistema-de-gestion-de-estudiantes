@@ -1,6 +1,7 @@
 const { body } = require('express-validator');
 
 const registerValidation = [
+
   body('username')
     .isString()
     .trim()
@@ -9,14 +10,15 @@ const registerValidation = [
     .isAlphanumeric()
     .withMessage('El nombre de usuario solo debe contener letras y números'),
   
-  body('email')
+  body('correo')
     .isEmail()
     .normalizeEmail()
     .withMessage('El correo electrónico no es válido'),
 
   body('password')
-    .isLength({ min: 8 })
-    .withMessage('La contraseña debe tener al menos 8 caracteres')
+    .notEmpty().withMessage('La contraseña es obligatoria')
+    .isLength({ min: 6 })
+    .withMessage('La contraseña debe tener al menos 6 caracteres')
     .matches(/[A-Z]/)
     .withMessage('La contraseña debe contener al menos una letra mayúscula')
     .matches(/[a-z]/)

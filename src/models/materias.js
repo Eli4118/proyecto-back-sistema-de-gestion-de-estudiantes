@@ -38,7 +38,7 @@ const MateriaSchema = new mongoose.Schema({
   },
 });
 
-const Materia = mongoose.model('Materia', MateriaSchema);
+const Materia = mongoose.model('Materia', MateriaSchema.index({ nombre: 1, curso: 1 }, { unique: true }));
 module.exports = Materia;
 
 

@@ -5,6 +5,7 @@ const conectarDB = require('./src/config/db.js'); // Importar la función de con
 const router = require('./src/routers/indexRoutes.js');// importa Archivo de rutas principal
 const sessionData = require('./src/middleware/sessionData.js');
 const authRoutes = require('./src/routers/authRoutes.js');
+const errorHandler = require('./src/middleware/errorHandler.js');
 const cookieParser = require('cookie-parser');
 // Conectar a la base de datos
 conectarDB();
@@ -22,7 +23,7 @@ app.use(cookieParser());
 // Usa el middleware de sessionData antes de las rutas
 //app.use(sessionData);
 // Rutas de autenticación
-app.use('/api/auth', authRoutes);//esto que es ?? 
+app.use('/api/auth', authRoutes);
 // Usa el archivo router que incluye la ruta de estudiantes
 app.use(router);
 const PORT = process.env.PORT

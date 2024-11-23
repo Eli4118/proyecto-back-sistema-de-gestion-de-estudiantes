@@ -86,11 +86,52 @@ block content
             button.btn.btn-primary(type="submit" id="submitBtn") Guardar Cambios
 
 
-        script.
-            document.getElementById('updateUserForm').addEventListener('submit', async function(event) {
-                event.preventDefault(); // Previene el envío tradicional del formulario
 
-                const formData = new FormData(this); // Crea un objeto FormData con los datos del formulario
+        script.
+
+            document.addEventListener('DOMContentLoaded', async function () {
+                const formEditar = document.getElementById('updateUserForm');
+                const idMateria = formEditar.dataset.id; // Asume que el ID de la materia está en un atributo `data-id`
+
+                try {
+                    // Hacer la solicitud para obtener los datos de la materia
+                     const response = await fetch(this.action, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(datos), // Enviar los datos como JSON
+                    });                   
+                    
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        const { materia } = data;
+
+                        // Precargar los datos en los campos del formulario
+                        formEditar.nombre.value = materia.nombre || '';
+                        formEditar.profesor.value = materia.usuario.profesor?._id || '';
+                        formEditar.horario.value = materia.horario || '';
+                        formEditar.nivel.value = materia.curso ? materia.curso.nivel || '';
+                        formEditar.grado.value = materia.curso ? materia.curso.grado || '';
+                        formEditar.division.value = materia.curso ? materia.curso.division ;
+                        formEditar.turno.value = materia.curso ? materia.curso.turno || '';
+                    } else {
+                        console.log('Error al obtener la materia.',data.error)
+                        alert(data.error || 'Error al obtener la materia.');
+                    }
+                } catch (error) {
+                    console.error('Error al cargar los datos de la materia:', error);
+                    alert('Error al cargar los datos de la materia.');
+                }
+            });
+
+        script.
+
+            document.getElementById('updateUserForm').addEventListener('submit', async function (event) {
+                event.preventDefault(); // Evita el envío tradicional del formulario
+
+                const formData = new FormData(this); // Captura los datos del formulario
                 const datos = Object.fromEntries(formData); // Convierte FormData a un objeto
 
                 try {
@@ -99,22 +140,20 @@ block content
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify(datos), // Convierte el objeto a JSON
+                        body: JSON.stringify(datos), // Enviar los datos como JSON
                     });
 
-                    const result = await response.json(); // Espera la respuesta y la convierte a JSON
+                    const result = await response.json(); // Parsear la respuesta JSON
 
                     if (response.ok) {
-                        // Si la respuesta es exitosa, muestra el mensaje
-                        alert(result.message);
-                        // Redirige o actualiza la página según sea necesario
-                        window.location.href = '/usuarios/materias'; // Descomentar para redirigir
+                        alert(result.message); // Muestra mensaje de éxito
+                        window.location.href = '/usuarios/materias';
                     } else {
-                        // Muestra el mensaje de error
-                        alert(result.message);
+                        // Muestra mensaje de error enviado por el backend
+                        alert(result.message || 'Error al actualizar la materia');
                     }
                 } catch (error) {
-                    console.error('Error al actualizar el usuario:', error);
-                    alert('Error al actualizar el usuario');
+                    console.error('Error al conectar con el servidor:', error);
+                    alert('Error al conectar con el servidor. Intenta nuevamente.');
                 }
             });

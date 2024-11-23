@@ -33,7 +33,7 @@ block content
                         option(value="" disabled) No hay niveles disponibles
             .mb-3
                 label(for="grado") Grado
-                select#grado.form-select(name="grado")
+                select#grado.form-select(name="grado" required)
                     option(value="" disabled selected) Selecciona un grado
                     if grados && grados.length
                         each grado in grados
@@ -43,7 +43,7 @@ block content
     
             .mb-3
                 label(for="division") Division
-                select#grado.form-select(name="division" )
+                select#grado.form-select(name="division" required)
                     option(value="" disabled selected) Selecciona una division
                     if divisiones && divisiones.length
                         each division in divisiones
@@ -53,7 +53,7 @@ block content
 
             .mb-3
                 label(for="turno") Turno
-                select#grado.form-select(name="turno" )
+                select#grado.form-select(name="turno" required)
                     option(value="" disabled selected) Selecciona un turno
                     if turnos && turnos.length
                         each turno in turnos
