@@ -23,7 +23,7 @@ app.use(cookieParser());
 // Usa el middleware de sessionData antes de las rutas
 //app.use(sessionData);
 // Rutas de autenticación
-app.use('/api/auth', authRoutes);
+app.use('/usuarios', authRoutes);
 // Usa el archivo router que incluye la ruta de estudiantes
 app.use(router);
 const PORT = process.env.PORT

@@ -13,7 +13,7 @@ router.get('/', (req, res, next) => {res.render('home')})
 router.get('/home2',autenticarJWT,agregarUsuarioAVista, verificarRol(['administrativo','tutor','profesor','estudiante']), (req, res, next) => {res.render('home2')})
 // Renderiza pagina formulario de registro solo se admite al administrativo
 router.get('/registro',autenticarJWT,agregarUsuarioAVista, verificarRol(['administrativo']),(req, res, next) => {res.render("registro")})
-router.get('/materias',verificarRol(['administrativo']),(req, res, next) => {res.render('gest-materias')})
+router.get('/materias',autenticarJWT,agregarUsuarioAVista,verificarRol(['administrativo']),(req, res, next) => {res.render('gest-materias')})
 //router.get('/materias/nueva',verificarRol(['administrativo']),(req, res, next) => {res.render('cargarMaterias')})
 //router.get('/editar/:id',(req, res, next) => {res.render('editar')})
 //router.get('/materias/editar',verificarRol(['administrativo']),(req, res, next) => {res.render("editarMateria")})
