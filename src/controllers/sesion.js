@@ -5,12 +5,12 @@ const { compararPass } = require('../utils/bcrypt'); // Asegúrate de que bcrypt
 const cookieConfig = require('../utils/cookie'); // Configuración de cookies
 
 const SesionController = {
-  login: async (req, res) => {
+  login: async (req, res, next) => {
     const { correo, password } = req.body;
-
     try {
       // Buscar al usuario por correo
       const usuario = await Usuario.findOne({ correo });
+      
       if (!usuario) {
         //return res.status(400).json({ mensaje: 'Usuario no encontrado' });
         const error = new Error('Usuario no encontrado');

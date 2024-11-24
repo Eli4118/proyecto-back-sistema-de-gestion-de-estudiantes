@@ -7,7 +7,7 @@ const cursoRouter= require('./cursosRoutes');
 const router = express.Router();
 const verificarRol = require('../middleware/verificarRol')
 const {verNotas} = require('../controllers/historiaAcademica')
-
+const {obtEstudianteTutor, verNotas1} = require('../controllers/historiaAcademica')
 const autenticarJWT = require('../middleware/autenticarJWT')
 const agregarUsuarioAVista = require('../middleware/sessionData')
 //Renderiza pagina home 
@@ -30,6 +30,13 @@ router.use('/usuarios', autenticarJWT,agregarUsuarioAVista, usuariosRouter);
 router.use('/login', sesionRouter);
 // visualiza las notas de 1 estudiante
 router.get('/notas',autenticarJWT,verificarRol(['estudiante','tutor']),verNotas);
+//rutas para tutor 
+//visualiza los estudiantes relacionados con el tutor
+router.get('/tutor',autenticarJWT,verificarRol(['tutor']), obtEstudianteTutor);
+//visualiza las notas de un estudiantes relacionados con el tutor
+router.get('/tutor/:dni',autenticarJWT,verificarRol(['tutor']), verNotas1); 
+
+
 //visualiza 404 con cualquier ruta no definida
 router.use((req, res, next) => {
   return res.status(404).render('404', { title: 'Página no encontrada' });

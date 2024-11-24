@@ -1,17 +1,17 @@
 const express = require('express');
 const verificarRol = require('../middleware/verificarRol')//para protejer la ruta
 const usuarioController = require('../controllers/usuario');
-const {obtEstudianteTutor, verNotas1} = require('../controllers/historiaAcademica')
+//const {obtEstudianteTutor, verNotas1} = require('../controllers/historiaAcademica')
 const usuarioRouter = express.Router();
 const autenticarJWT = require('../middleware/autenticarJWT')
 const agregarUsuarioAVista = require('../middleware/sessionData')
 //hacer un enrutador para tutor 
 
-//rutas para tutor 
+/* //rutas para tutor 
 //visualiza los estudiantes relacionados con el tutor
 usuarioRouter.get('/tutor',verificarRol(['tutor']), obtEstudianteTutor);
 //visualiza las notas de un estudiantes relacionados con el tutor
-usuarioRouter.get('/tutor/:dni',verificarRol(['tutor']), verNotas1); 
+usuarioRouter.get('/tutor/:dni',verificarRol(['tutor']), verNotas1);  */
 
 //rutas para usuarios
 // Crear usuario

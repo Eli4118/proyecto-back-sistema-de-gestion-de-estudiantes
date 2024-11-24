@@ -8,13 +8,13 @@ const mongoose = require('mongoose');
 async function nota(usuarioAutenticado) {
   try {
     // Verificar que el usuario está autenticado y tiene un ID válido
-    if (!usuarioAutenticado || !usuarioAutenticado._id) {
+    if (!usuarioAutenticado || !usuarioAutenticado.id) {
       return res.status(401).send('Usuario no autenticado');
     }
     let estudianteId;
     // Si el usuario autenticado es un estudiante
     if (usuarioAutenticado.rol === 'estudiante') {
-      estudianteId = usuarioAutenticado._id;
+      estudianteId = usuarioAutenticado.id;
     }
     // Si el usuario autenticado es un tutor
     else if (usuarioAutenticado.rol === 'tutor') {
@@ -64,7 +64,7 @@ async function verNotas(req, res) {
   async function obtEstudianteTutor(req, res) {
     try {
       // Asumiendo que el tutor está logueado y su DNI está almacenado en req.user
-      const tutor = req.user;  // O req.user._id si usas ObjectId
+      const tutor = req.usuario;  // O req.user._id si usas ObjectId
       const dniTutor = tutor.dni;
       // Busca a los estudiantes relacionados con este tutor
       const estudiantes = await Usuario.find({ dniTutor: dniTutor, rol: 'estudiante' });
