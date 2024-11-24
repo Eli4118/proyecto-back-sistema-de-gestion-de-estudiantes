@@ -1,24 +1,15 @@
-
-// middleware/errorHandler.js
 function errorHandler(err, req, res, next) {
   console.error('Error capturado:', err);
 
-  // Si el error tiene un array de errores (por ejemplo, de validaciones)
-  if (err.errors) {
-    return res.status(err.status || 400).json({
-      success: false,
-      message: err.message || 'Errores de validación',
-      errors: err.errors, // Incluye los detalles de los errores
-    });
-  }
+  const statusCode = err.status || 500; // Código de estado
+  const message = err.message || 'Error interno del servidor';
+  const errors = err.errors || null; // Errores de validación si existen
 
-  // Otros errores
-  res.status(err.status || 500).json({
+  res.status(statusCode).json({
     success: false,
-    message: err.message || 'Error interno del servidor',
-    
+    message,
+    errors, // Enviar array de errores de validación al cliente
   });
-};
-
+}
 
 module.exports = errorHandler;

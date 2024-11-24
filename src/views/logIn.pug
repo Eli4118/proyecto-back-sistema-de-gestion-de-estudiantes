@@ -64,12 +64,22 @@ block content
         if (!response.ok) {
           // Si la respuesta no es 200 OK, asumir que es un error
           const result = await response.json();
-          alert(result.mensaje || 'Error desconocido');
+
+          // Mostrar el mensaje de error con alert
+          if (result.errors && Array.isArray(result.errors)) {
+            // Si hay errores de validación, se muestran todos los errores
+            const errorMessages = result.errors.map(error => error.msg).join('\n');
+            alert(`Errores de validación:\n${errorMessages}`);
+          } else {
+            // Mostrar el mensaje general
+            alert(result.mensaje || 'Error desconocido');
+          }
         } else {
           // Si es un éxito, permitir que la redirección del backend ocurra normalmente
           window.location.href = response.url;
         }
       } catch (error) {
+        // Capturar cualquier otro error (por ejemplo, problemas de conexión)
         alert('Error de conexión. Intenta nuevamente.');
       }
     });

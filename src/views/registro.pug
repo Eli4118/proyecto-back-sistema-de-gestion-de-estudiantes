@@ -4,7 +4,7 @@ block content
   .container.mt-5
     h1.text-center Registro de Usuario
 
-    form(action="/usuarios" method="POST" class="needs-validation" onsubmit="return manejarRegistroUsuario(this);")
+    form(action="/usuarios/registro" method="POST" class="needs-validation" onsubmit="return manejarRegistroUsuario(this);")
       .form-group
         label(for="rol") Rol:
         select.form-control(name="rol" id="rol" required onchange="toggleAdditionalFields();")

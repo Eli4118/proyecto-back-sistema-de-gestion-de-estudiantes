@@ -7,6 +7,8 @@ const SesionController= require('../controllers/sesion');
 const { handleValidationErrors } = require('../middleware/handleValidationErrors');
 const verificarRol = require('../middleware/verificarRol');
 const { body } = require('express-validator');
+const autenticarJWT = require('../middleware/autenticarJWT')
+const agregarUsuarioAVista = require('../middleware/sessionData')
 
 const authrouter = express.Router();
 
@@ -21,8 +23,9 @@ http://localhost:8000/api/auth
 // Ruta para registro
 // Ruta para el registro
 authrouter.post(
-  '/',
-
+  '/registro',
+  autenticarJWT,
+  agregarUsuarioAVista,
   verificarRol(['administrativo']), 
   //registerValidation, // Validaciones
   registerValidator,
@@ -34,7 +37,7 @@ authrouter.post(
 
 // Ruta de login
 authrouter.post(
-  '/', 
+  '/login', 
  
   loginValidation,
   handleValidationErrors,
