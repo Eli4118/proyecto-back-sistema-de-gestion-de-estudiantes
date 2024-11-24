@@ -14,30 +14,30 @@ block content
         th Acción
     tbody
       each materia in materias
-        each estudiante in materia.curso.estudiantes
-          tr(data-estudiante-id=estudiante._id data-materia-id=materia._id)
-            td= materia.curso.grado + ' ' + materia.curso.division
-            td= materia.nombre
-            td= estudiante.nombres + ' ' + estudiante.apellidos
-            td= estudiante.dni
-            td.nota-columna= estudiante.nota != 'no hay nota' ? estudiante.nota : 'Sin nota'
-            td
-              //- Formulario para cargar o actualizar la nota
-              form(action="/profesor" method="POST" onsubmit="return manejarNota(this);")
-                input(type="hidden" name="estudianteId" value=estudiante._id)
-                input(type="hidden" name="materiaId" value=materia._id)
-                input(type="hidden" name="notaActual" value= estudiante.nota != 'no hay nota' ? estudiante.nota : '')
-                .input-group
-                  input.form-control(type="number" name="calificacion" value= estudiante.nota != 'no hay nota' ? estudiante.nota : '' placeholder="Calificación" required min="0" max="10")
-                  select.form-control(name="tipoEvaluacion" required)
-                    option(value="Parcial" selected=estudiante.tipoEvaluacion == "Parcial") Parcial
-                    option(value="Final" selected=estudiante.tipoEvaluacion == "Final") Final
-                    option(value="Tarea" selected=estudiante.tipoEvaluacion == "Tarea") Tarea
-                    option(value="Examen" selected=estudiante.tipoEvaluacion == "Examen") Examen
-                    option(value="Otro" selected=estudiante.tipoEvaluacion == "Otro") Otro
-                  input.form-control(type="text" name="observaciones" placeholder="Observaciones" value= estudiante.observaciones || '')
-                  button.btn(type="submit" class= estudiante.nota == 'no hay nota' ? 'btn-success' : 'btn-warning') 
-                    = estudiante.nota == 'no hay nota' ? 'Cargar Nota' : 'Actualizar Nota'
+        tr(data-estudiante-id=materia.estudiante._id data-materia-id=materia.materiaId)
+          td= materia.curso
+          td= materia.materia
+          td= materia.estudiante.nombres + ' ' + materia.estudiante.apellidos
+          td= materia.estudiante.DNI
+          td.nota-columna= materia.calificacion != null ? materia.calificacion : 'Sin nota'
+          td
+            //- Formulario para cargar o actualizar la nota
+            form(action="/profesor" method="POST" onsubmit="return manejarNota(this);")
+              input(type="hidden" name="estudianteId" value=materia.estudiante._id)
+              input(type="hidden" name="materiaId" value=materia.materiaId)
+              input(type="hidden" name="notaActual" value=materia.calificacion != null ? materia.calificacion : '')
+              input(type="hidden" name="notaId" value=materia.notaid || '')
+              .input-group
+                input.form-control(type="number" name="calificacion" value=materia.calificacion != null ? materia.calificacion : '' placeholder="Calificación" required min="0" max="10")
+                select.form-control(name="tipoEvaluacion" required)
+                  option(value="Parcial" selected=materia.tipoEvaluacion == "Parcial") Parcial
+                  option(value="Final" selected=materia.tipoEvaluacion == "Final") Final
+                  option(value="Tarea" selected=materia.tipoEvaluacion == "Tarea") Tarea
+                  option(value="Examen" selected=materia.tipoEvaluacion == "Examen") Examen
+                  option(value="Otro" selected=materia.tipoEvaluacion == "Otro") Otro
+                input.form-control(type="text" name="observaciones" placeholder="Observaciones" value=materia.observaciones || '')
+                button.btn(type="submit" class=materia.calificacion == null ? 'btn-success' : 'btn-warning') 
+                  = materia.calificacion == null ? 'Cargar Nota' : 'Actualizar Nota'
 
     script.
       function manejarNota(form) {
@@ -64,13 +64,13 @@ block content
             const row = document.querySelector(`tr[data-estudiante-id="${data.nota.estudiante}"][data-materia-id="${data.nota.materia}"]`);
             if (row) {
               const notaColumna = row.querySelector('.nota-columna');
-              notaColumna.textContent = data.nota.calificacion;
+              notaColumna.textContent = data.nota.calificacion !== null ? data.nota.calificacion : 'Sin nota';
 
               // Cambiar el botón a "Actualizar Nota"
               const button = row.querySelector('button');
-              button.textContent = 'Actualizar Nota';
-              button.classList.remove('btn-success'); // Eliminar clase de cargar
-              button.classList.add('btn-warning'); // Agregar clase de actualizar
+              button.textContent = data.nota.calificacion !== null ? 'Actualizar Nota' : 'Cargar Nota';
+              button.classList.toggle('btn-success', data.nota.calificacion === null);
+              button.classList.toggle('btn-warning', data.nota.calificacion !== null);
             }
           } else {
             alert(data.message);

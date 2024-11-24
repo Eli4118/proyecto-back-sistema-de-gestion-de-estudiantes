@@ -2,7 +2,8 @@ const Nota = require('../models/notas');
 const Usuario = require('../models/usuarios');
 const Materia = require('../models/materias');
 const Curso = require('../models/cursos');
-const { getUsuarioAutenticado } = require('../utils/session');
+const mongoose = require('mongoose');
+
 
 async function nota(usuarioAutenticado) {
   try {
@@ -39,7 +40,7 @@ async function nota(usuarioAutenticado) {
 }
 //estudiante
 async function verNotas(req, res) {
-  const usuarioAutenticado = getUsuarioAutenticado(); 
+  const usuarioAutenticado = req.usuario
   try {
     const notas = await nota(usuarioAutenticado);
     res.render('historiaAcademica', { notas });
@@ -63,7 +64,7 @@ async function verNotas(req, res) {
   async function obtEstudianteTutor(req, res) {
     try {
       // Asumiendo que el tutor está logueado y su DNI está almacenado en req.user
-      const tutor = getUsuarioAutenticado();  // O req.user._id si usas ObjectId
+      const tutor = req.user;  // O req.user._id si usas ObjectId
       const dniTutor = tutor.dni;
       // Busca a los estudiantes relacionados con este tutor
       const estudiantes = await Usuario.find({ dniTutor: dniTutor, rol: 'estudiante' });
@@ -83,52 +84,123 @@ async function verNotas(req, res) {
     }
   }
 
-
   async function obtenerCursosYMaterias(req, res) {
     try {
-      const usuarioAutenticado = getUsuarioAutenticado();
-
-      // Buscar las materias impartidas por el profesor
-      const materias = await Materia.find({ profesor: usuarioAutenticado._id })
-        .populate({
-          path: 'curso',
-          populate: {
-            path: 'estudiantes',
-            select: 'nombres apellidos dni'  // Seleccionas múltiples atributos
-          }
-        }).lean()
-        console.log(materias)
-      const materiaId = materias[0]._id;//guardo el id de la materia 
-
-      // Extraer los IDs de los estudiantes del curso
-      const estudiantesIds = materias[0].curso.estudiantes.map(est => est._id);
-      // Hacer una sola co nsulta para obtener las notas de los estudiantes en esta materia
-      const notas = await Nota.find({
-        estudiante: { $in: estudiantesIds }, // Todos los estudiantes del curso
-        materia: materiaId // Solo la materia que dicta el profesor
-      }).lean();
-
-      // Agregar calificaciones a los alumnos
-      materias[0].curso.estudiantes.forEach(alumno => {
-        // Buscar la nota correspondiente al alumno
-        const nota = notas.find(n => n.estudiante.equals(alumno._id));
-
-        // Si hay una nota, agregar la calificación; si no, asignar "no hay nota"
-        alumno.nota = nota ? nota.calificacion : "no hay nota";
-      });
-
-      // Renderizar los cursos con los estudiantes y materias
+      const usuarioAutenticado = req.usuario;
+  
+      // Pipeline de agregación
+      const pipeline = [
+        {
+          $match: { profesor: new mongoose.Types.ObjectId(usuarioAutenticado.id) }, // Asegurarse que sea ObjectId
+        },
+        {
+          $lookup: {
+            from: "cursos",
+            localField: "_id", 
+            foreignField: "materias",
+            as: "cursos",
+          },
+        },
+        {
+          $unwind: "$cursos",
+        },
+        {
+          $lookup: {
+            from: "usuarios",
+            localField: "cursos.estudiantes",
+            foreignField: "_id",
+            as: "estudiantes",
+          },
+        },
+        {
+          $unwind: "$estudiantes",
+        },
+        {
+          $lookup: {
+            from: "notas",
+            let: { estudianteId: "$estudiantes._id", materiaId: "$_id" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ["$estudiante", "$$estudianteId"] }, 
+                      { $eq: ["$materia", "$$materiaId"] },
+                      { $eq: ["$profesor", new mongoose.Types.ObjectId(usuarioAutenticado.id)] }, // Comparar como ObjectId
+                    ],
+                  },
+                },
+              },
+              {
+                $project: {
+                  _id: 1,
+                  calificacion: 1,
+                  tipoEvaluacion: 1,
+                },
+              },
+            ],
+            as: "notas",
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            materiaId: "$_id",
+            materia: "$nombre",
+            curso: {
+              $concat: [
+                { $toString: "$cursos.grado" }, 
+                " ",
+                "$cursos.division",
+              ],
+            },
+            estudiante: {
+              _id: "$estudiantes._id",
+              nombres: "$estudiantes.nombres",
+              apellidos: "$estudiantes.apellidos",
+              DNI: "$estudiantes.dni",
+            },
+            nota: {
+              $ifNull: [
+                { $arrayElemAt: ["$notas", 0] }, 
+                null, // Devolver null si no hay nota
+              ],
+            },
+          },
+        },
+      ];
+  
+      const resultados = await Materia.aggregate(pipeline);
+  
+      // Formatear los resultados finales
+      const materias = resultados.map(result => ({
+        materia: result.materia,
+        materiaId: result.materiaId,
+        curso: result.curso,
+        estudiante: {
+          _id: result.estudiante._id,
+          nombres: result.estudiante.nombres,
+          apellidos: result.estudiante.apellidos,
+          DNI: result.estudiante.DNI,
+        },
+        calificacion: result.nota ? result.nota.calificacion : null,
+        tipoEvaluacion: result.nota ? result.nota.tipoEvaluacion : null,
+        notaid: result.nota ? result.nota._id : null,
+      }));
+      console.log(materias);
+  
       res.render('profesores', { materias });
     } catch (error) {
       console.error(error);
-      res.status(500).send('Error al obtener los cursos y materias del profesor');
+      res.status(500).send("Error al obtener los cursos y materias del profesor");
     }
   }
+  
 
   async function cargarNota(req, res) {
     try {
       const { estudianteId, materiaId, calificacion, tipoEvaluacion, observaciones } = req.body;
-
+      const usuarioAutenticado = req.usuario;
       // Validar que la calificación esté en el rango permitido 
       if (calificacion < 1 || calificacion > 10) {
         return res.status(400).send('La calificación debe estar entre 1 y 10.');
@@ -138,7 +210,7 @@ async function verNotas(req, res) {
       const nuevaNota = new Nota({
         estudiante: estudianteId,
         materia: materiaId,
-        profesor: getUsuarioAutenticado()._id, // Suponiendo que tienes un método para obtener el profesor autenticado
+        profesor: usuarioAutenticado.id, // Suponiendo que tienes un método para obtener el profesor autenticado
         calificacion,
         tipoEvaluacion,
         observaciones

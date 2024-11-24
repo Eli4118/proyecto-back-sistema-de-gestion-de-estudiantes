@@ -19,13 +19,13 @@ router.get('/usuarios',autenticarJWT,agregarUsuarioAVista,verificarRol(['adminis
 //router.get('/editar/:id',(req, res, next) => {res.render('editar')})
 //router.get('/materias/editar',verificarRol(['administrativo']),(req, res, next) => {res.render("editarMateria")})
 // Llama al router de profesor
-router.use('/profesor',verificarRol(['profesor']),profesorRouter)
+router.use('/profesor',autenticarJWT,verificarRol(['profesor']),profesorRouter)
 //  Llama al router de usuarios
 router.use('/usuarios', autenticarJWT,agregarUsuarioAVista, usuariosRouter);
 //  Llama al router de usuarios
 router.use('/login', sesionRouter);
 // visualiza las notas de 1 estudiante
-router.get('/notas',verificarRol(['estudiante','tutor']),verNotas);
+router.get('/notas',autenticarJWT,verificarRol(['estudiante','tutor']),verNotas);
 //visualiza 404 con cualquier ruta no definida
 router.use((req, res, next) => {
   return res.status(404).render('404', { title: 'Página no encontrada' });
