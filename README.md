@@ -130,6 +130,5 @@ Equipo: **Grupo 12 - Discordia**
 
 --- 
 
-## Enlaces
-- [Repositorio GitHub](https://github.com/Eli4118/proyecto-back-sistema-de-gestion-de-estudiantes)
-- [Video de demostración](https://drive.google.com/drive/folders/1py0Z-fLg6xlcMeGUQqvvxvXcSnRX6uLw?usp=sharing)
+
+
