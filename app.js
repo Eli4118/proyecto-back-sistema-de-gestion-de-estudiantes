@@ -25,7 +25,7 @@ app.use(cookieParser());
 app.use('/api/auth', authRoutes);//esto que es ?? 
 // Usa el archivo router que incluye la ruta de estudiantes
 app.use(router);
-/* const PORT = process.env.PORT
+const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 }); */
